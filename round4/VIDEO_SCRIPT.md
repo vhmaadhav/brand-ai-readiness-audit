@@ -1,7 +1,9 @@
 # Round 4 — Video Script (≤ 5:00)
 
-Part 1 is a **silent, auto-playing visual** (`round4/methodology-video.html`,
-3:00, screen-record it full-screen). A presenter talks over it live; the lines
+Part 1 is a **silent 3:00 video with burned-in subtitles**: `round4/part1-methodology.mp4`
+(1920x1080, 24 fps), rendered frame-exact from `round4/methodology-video.html` by
+`python round4/render_video.py` (`--nosubs` for a clean cut; soft subtitles in
+`round4/part1-methodology.srt`). A presenter talks over it live; the lines
 below are their **talking points**, one scene at a time. Every claim names the
 file and line that implements it, and the same anchor is on screen.
 
