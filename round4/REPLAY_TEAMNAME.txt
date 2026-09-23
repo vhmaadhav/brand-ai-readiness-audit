@@ -1,0 +1,10 @@
+TEST_SITE_URLS: https://docs.python.org/3/   # REPLACE with the exact URL(s) used on camera before submitting
+LLM_MODEL: Claude Opus 5.5 (claude-opus-5-5, 2026)
+AGENT_HARNESS: Claude Code v2.1.132
+ENV_SETUP: git clone https://github.com/Sachin0496/brand-ai-readiness-audit.git && cd brand-ai-readiness-audit && git checkout a6f9325   # Python 3.10+ standard library only; no pip install needed
+TEST_STEPS:
+ 1. claude
+ 2. Use the audit-orchestrator entrypoint skill in skills/audit-orchestrator/SKILL.md to audit https://docs.python.org/3/ for AI discoverability and engagement. Run its run_audit.py script with --formats json,md,html --out ./audit-report, then summarise the findings by severity, show the evidence for the top finding, and list the suggested actions sorted by priority.
+ 3. The agent runs: python3 skills/audit-orchestrator/scripts/run_audit.py https://docs.python.org/3/ --formats json,md,html --out ./audit-report . Progress streams as [1/8]..[8/8]; the report is written to ./audit-report.json (canonical), ./audit-report.md and ./audit-report.html. Findings are in .findings[] sorted by severity then pipeline layer; each carries evidence, observed, expected, affected_urls, claim_level and suggested_action{priority,effort,mechanism,verification}. The critic's drops/merges are in .advisory.
+ FALLBACK (no Claude Code): python3 skills/audit-orchestrator/scripts/run_audit.py <URL> --formats json,md,html --out ./audit-report
+EXPECTED_OUTPUT: ./audit-report.json

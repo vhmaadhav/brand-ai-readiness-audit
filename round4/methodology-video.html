@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-Readiness Methodology</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0f13;--panel:#171922;--ink:#f3f1ea;--mute:#8b8fa3;--accent:#ff4d2e;--ok:#3ecf8e;--warn:#ffb020;--hi:#ff7a45;--line:#2a2d3a;
+  --sans:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;z-index:9;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .5s steps(3) infinite}
+@keyframes grain{50%{transform:translate(-8px,6px)}}
+.scene{position:fixed;inset:0;display:none;flex-direction:column;justify-content:center;padding:6vh 7vw;gap:3vh}
+.scene.on{display:flex}
+.scene.on .s{animation:pop .5s steps(4) both;animation-delay:calc(var(--i,0) * .9s)}
+@keyframes pop{0%{opacity:0;transform:translateY(18px) rotate(-1.5deg) scale(.96)}60%{opacity:1;transform:translateY(-3px) rotate(.6deg)}100%{opacity:1;transform:none}}
+h1{font-size:clamp(34px,6.2vw,92px);line-height:1;letter-spacing:-.03em}
+h2{font-size:clamp(26px,3.8vw,56px);line-height:1.05;letter-spacing:-.02em}
+.kicker{font-family:var(--mono);color:var(--accent);font-size:clamp(12px,1.2vw,18px);letter-spacing:.12em;text-transform:uppercase}
+p.lead{font-size:clamp(16px,1.8vw,28px);color:var(--mute);max-width:60ch}
+em{color:var(--accent);font-style:normal}
+.anchor{position:fixed;left:7vw;bottom:5vh;font-family:var(--mono);font-size:clamp(11px,1.05vw,16px);color:var(--ok);background:#0f1f18;border:1px solid #1f4a36;padding:.5em .9em;border-radius:6px;max-width:86vw}
+.anchor::before{content:"▸ code  ";color:var(--mute)}
+.row{display:flex;gap:1.2vw;flex-wrap:wrap;align-items:center}
+.gate{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:.7em 1em;font-weight:600;font-size:clamp(13px,1.35vw,21px)}
+.gate small{display:block;font-weight:400;color:var(--mute);font-family:var(--mono);font-size:.7em;margin-top:.2em}
+.gate.x{border-color:var(--accent);box-shadow:4px 4px 0 var(--accent)}
+.arrow{color:var(--mute);font-size:1.6vw}
+.big{font-size:clamp(60px,13vw,200px);font-weight:700;line-height:.9;color:var(--accent);letter-spacing:-.04em}
+.stats{display:flex;gap:4vw;flex-wrap:wrap}
+.stat b{display:block;font-size:clamp(26px,4vw,60px)}
+.stat span{color:var(--mute);font-family:var(--mono);font-size:clamp(11px,1vw,15px)}
+.bars{display:grid;grid-template-columns:minmax(120px,18vw) 1fr 7vw;gap:1.1vh 1vw;align-items:center;max-width:78vw}
+.bars .lbl{font-size:clamp(13px,1.4vw,21px)}
+.bars .v{font-family:var(--mono);font-size:clamp(12px,1.2vw,18px);text-align:right}
+.bar{height:clamp(16px,2.6vh,30px);background:var(--ok);border-radius:3px;transform-origin:left}
+.scene.on .bar{animation:grow .8s steps(6) both;animation-delay:calc(var(--i,0) * .9s)}
+@keyframes grow{from{transform:scaleX(0)}}
+.bar.neg{background:var(--accent);width:6%!important}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3vw;max-width:80vw}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:2.4vh 1.6vw}
+.card h3{font-size:clamp(16px,1.8vw,28px);margin-bottom:.6em}
+.card .n{font-family:var(--mono);font-size:clamp(28px,4.5vw,66px);font-weight:600}
+.card .m{color:var(--mute);font-size:clamp(12px,1.2vw,18px)}
+table{border-collapse:collapse;font-size:clamp(13px,1.45vw,22px)}
+td,th{padding:.55em 1.1em;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mute);font-weight:400;font-family:var(--mono);font-size:.75em;text-transform:uppercase;letter-spacing:.08em}
+.sev{font-family:var(--mono);font-weight:600;padding:.15em .5em;border-radius:4px;font-size:.85em}
+.c{background:var(--accent);color:#fff}.h{background:var(--hi);color:#111}.m{background:var(--warn);color:#111}.n4{background:#333;color:var(--mute);text-decoration:line-through}
+.filter{display:grid;grid-template-columns:repeat(5,1fr);gap:1vw;max-width:86vw}
+.filter .gate{text-align:center}
+.chips{display:flex;gap:.8vw;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:clamp(11px,1.1vw,16px);padding:.4em .8em;border-radius:999px;border:1px solid var(--line)}
+.chip.drop{border-color:var(--accent);color:var(--accent);text-decoration:line-through}
+.chip.keep{border-color:var(--ok);color:var(--ok)}
+.fix{font-family:var(--mono);font-size:clamp(12px,1.3vw,19px);background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:2.4vh 2vw;line-height:1.7;max-width:80vw}
+.fix .k{color:var(--mute)}.fix .s2{color:var(--ok)}
+#hud{position:fixed;left:0;right:0;top:0;height:4px;background:#222;z-index:10}
+#prog{height:100%;background:var(--accent);width:0}
+#tc{position:fixed;right:2vw;bottom:5vh;font-family:var(--mono);color:var(--mute);font-size:13px;z-index:10}
+#tc.hide{display:none}
+@media (max-width:700px){.cmp,.filter{grid-template-columns:1fr}.scene{padding:6vh 16px}.anchor{left:16px}}
+</style>
+</head>
+<body>
+<div id="hud"><div id="prog"></div></div>
+<div id="tc"></div>
+
+<!-- 1 -->
+<section class="scene" data-d="12">
+  <div class="kicker s" style="--i:0">Adobe University Hackathon · Round 4</div>
+  <h1 class="s" style="--i:1">Brand AI-Readiness<br><em>Audit</em></h1>
+  <p class="lead s" style="--i:2">Why AI assistants don't cite a brand — and why the visitors who arrive don't stay. 8 skills · 1 entrypoint · Python stdlib only.</p>
+  <div class="anchor s" style="--i:3">marketplace.json → "entrypoint": "audit-orchestrator"</div>
+</section>
+
+<!-- 2 -->
+<section class="scene" data-d="20">
+  <div class="kicker s">Core idea</div>
+  <h2 class="s" style="--i:1">GEO is a <em>staged pipeline</em>, not a ranking.<br>The gate you fail decides the fix.</h2>
+  <div class="row">
+    <div class="gate s" style="--i:2">Preflight<small>safe · in scope</small></div><span class="arrow s" style="--i:2">→</span>
+    <div class="gate s" style="--i:3">Reachability<small>can it be fetched</small></div><span class="arrow s" style="--i:3">→</span>
+    <div class="gate s" style="--i:4">Selection<small>is the entity clear</small></div><span class="arrow s" style="--i:4">→</span>
+    <div class="gate s" style="--i:5">Absorption<small>does it shape answers</small></div><span class="arrow s" style="--i:5">→</span>
+    <div class="gate s" style="--i:6">Trust<small>current · corroborated</small></div><span class="arrow s" style="--i:6">→</span>
+    <div class="gate s" style="--i:7">Engagement<small>does the human stay</small></div><span class="arrow s" style="--i:7">→</span>
+    <div class="gate x s" style="--i:8">Advisory critic<small>drop · downgrade · merge</small></div>
+  </div>
+  <div class="anchor s" style="--i:9">skills/audit-orchestrator/scripts/run_audit.py:112 run_stage()</div>
+</section>
+
+<!-- 3 -->
+<section class="scene" data-d="20">
+  <div class="kicker s">Field research · arXiv 2604.25707</div>
+  <div class="stats s" style="--i:1">
+    <div class="stat"><b>602</b><span>prompts</span></div>
+    <div class="stat"><b>21,143</b><span>citations</span></div>
+    <div class="stat"><b>3</b><span>ChatGPT · Google AIO · Perplexity</span></div>
+  </div>
+  <div class="big s" style="--i:3">76.44%</div>
+  <p class="lead s" style="--i:4">fetch success. <em>1 in 4</em> pages an engine had already chosen to cite could not be retrieved → reachability is a gate, with per-type JS render-fault diagnosis.</p>
+  <div class="anchor s" style="--i:5">lib/geo_audit/renderfaults.py:160 diagnose() → empty_shell · noscript_gap …</div>
+</section>
+
+<!-- 4 -->
+<section class="scene" data-d="18">
+  <div class="kicker s">Signal split</div>
+  <h2 class="s" style="--i:1">Being cited ≠ <em>mattering</em></h2>
+  <div class="cmp">
+    <div class="card s" style="--i:2"><h3>ChatGPT</h3><div class="n">0.2713</div><div class="m">mean influence · 6.88 citations/prompt</div></div>
+    <div class="card s" style="--i:3"><h3>Perplexity</h3><div class="n" style="color:var(--accent)">0.0646</div><div class="m">mean influence · 16.35 citations/prompt</div></div>
+  </div>
+  <p class="lead s" style="--i:4">Selection (structured data, sameAs, entity) and absorption (evidence density) are measured separately — and fixed differently.</p>
+  <div class="anchor s" style="--i:5">check_structured_data.py:812 sameAs · lib/geo_audit/influence.py:56 weights</div>
+</section>
+
+<!-- 5 -->
+<section class="scene" data-d="20">
+  <div class="kicker s">The non-obvious finding · §8.2</div>
+  <h2 class="s" style="--i:1">Evidence genres lift absorption. <em>FAQs don't.</em></h2>
+  <div class="bars">
+    <span class="lbl s" style="--i:2">Code / examples</span><div class="bar" style="--i:2;width:100%"></div><span class="v s" style="--i:2">+76.9%</span>
+    <span class="lbl s" style="--i:3">Numbers / stats</span><div class="bar" style="--i:3;width:80%"></div><span class="v s" style="--i:3">+61.6%</span>
+    <span class="lbl s" style="--i:4">Definitions</span><div class="bar" style="--i:4;width:75%"></div><span class="v s" style="--i:4">+57.3%</span>
+    <span class="lbl s" style="--i:5">Comparisons</span><div class="bar" style="--i:5;width:72%"></div><span class="v s" style="--i:5">+55.3%</span>
+    <span class="lbl s" style="--i:6">How-to</span><div class="bar" style="--i:6;width:54%"></div><span class="v s" style="--i:6">+41.2%</span>
+    <span class="lbl s" style="--i:8"><b style="color:var(--accent)">Q&amp;A / FAQ</b></span><div class="bar neg" style="--i:8"></div><span class="v s" style="--i:8;color:var(--accent)">−5.7%</span>
+  </div>
+  <p class="lead s" style="--i:9">We never recommend "add an FAQ" — enforced by a regression test.</p>
+  <div class="anchor s" style="--i:10">advisory-review/scripts/advise.py:413 · tests/test_marketplace.py:959</div>
+</section>
+
+<!-- 6 -->
+<section class="scene" data-d="15">
+  <div class="kicker s">Threshold logic · §8.1</div>
+  <h2 class="s" style="--i:1">Thresholds are a <em>floor</em>, not a target</h2>
+  <table class="s" style="--i:2">
+    <tr><th>metric</th><th>bottom 25% (our floor)</th><th>top 25%</th></tr>
+    <tr><td>Word count</td><td><em>169.82</em></td><td>1,943.30</td></tr>
+    <tr><td>Headings</td><td><em>0.85</em></td><td>10.59</td></tr>
+    <tr><td>Paragraphs</td><td><em>8.34</em></td><td>47.49</td></tr>
+  </table>
+  <p class="lead s" style="--i:4">Flag below the top quartile and you fire on most of the web. Precision first.</p>
+  <div class="anchor s" style="--i:5">lib/geo_audit/config.py:142–150</div>
+</section>
+
+<!-- 7 -->
+<section class="scene" data-d="25">
+  <div class="kicker s">Severity logic</div>
+  <h2 class="s" style="--i:1">Two axes: <em>how bad</em> × <em>how sure</em></h2>
+  <table class="s" style="--i:2">
+    <tr><th>claim level</th><th>kind</th><th>severity ceiling</th></tr>
+    <tr><td>1</td><td>Direct observation — "0 of 12 pages carry JSON-LD"</td><td><span class="sev c">critical</span></td></tr>
+    <tr><td>2</td><td>Descriptive contrast</td><td><span class="sev h">high</span></td></tr>
+    <tr><td>3</td><td>Mechanism interpretation</td><td><span class="sev m">medium</span></td></tr>
+    <tr><td>4</td><td>Causal prescription</td><td><span class="sev n4">never a finding</span></td></tr>
+  </table>
+  <p class="lead s" style="--i:4"><em>critical</em> = the brand cannot enter the candidate pool. Cap enforced 3×: construction → advisory re-level → schema validation.</p>
+  <div class="anchor s" style="--i:5">lib/geo_audit/report.py:101 __post_init__ · report.py:269 validate_report · references/severity-model.md</div>
+</section>
+
+<!-- 8 -->
+<section class="scene" data-d="25">
+  <div class="kicker s">The advisory critic</div>
+  <h2 class="s" style="--i:1">Detectors are optimistic. <em>Every finding must survive.</em></h2>
+  <div class="filter">
+    <div class="gate s" style="--i:2">Evidence<small>real URL + value</small></div>
+    <div class="gate s" style="--i:3">Threshold<small>actually breached</small></div>
+    <div class="gate s" style="--i:4">Sample<small>enough pages</small></div>
+    <div class="gate s" style="--i:5">Claim level<small>causal → relocate</small></div>
+    <div class="gate s" style="--i:6">FP traps<small>looks bad, isn't</small></div>
+  </div>
+  <div class="chips">
+    <span class="chip keep s" style="--i:7">no JSON-LD on 8/11 pages ✓</span>
+    <span class="chip drop s" style="--i:8">"median 1,400 ms &gt; 3,000 ms"</span>
+    <span class="chip drop s" style="--i:9">"site lacks structured data"</span>
+    <span class="chip keep s" style="--i:10">render fault + thin + no schema → 1 root cause</span>
+  </div>
+  <div class="anchor s" style="--i:11">advisory-review/scripts/advise.py:78 · 92 · 126 · 191 · 225 · 293 deduplicate()</div>
+</section>
+
+<!-- 9 -->
+<section class="scene" data-d="17">
+  <div class="kicker s">Suggested actions</div>
+  <h2 class="s" style="--i:1">Every fix names its <em>mechanism</em> and its <em>test</em></h2>
+  <div class="fix s" style="--i:2">
+    <span class="k">summary     </span> Allow live-retrieval agents on public content<br>
+    <span class="k">priority    </span> <span class="sev c">critical</span>   <span class="k">effort</span> low<br>
+    <span class="k">mechanism   </span> blocking retrieval ≠ blocking training<br>
+    <span class="k">verification</span> <span class="s2">re-run; blocked_retrieval must be empty</span>
+  </div>
+  <p class="lead s" style="--i:4">Priority ≠ severity. Sort: severity → pipeline order (upstream causes first) → confidence. Prefer <em>add the missing fact</em> over rewrites — rewrites cut citation ~6%.</p>
+  <div class="anchor s" style="--i:5">lib/geo_audit/report.py:170 sort_findings()</div>
+</section>
+
+<!-- 10 -->
+<section class="scene" data-d="8">
+  <h1 class="s">Now <em>live</em> →</h1>
+  <p class="lead s" style="--i:1">Claude Code · Claude Opus 5.5 · an unseen URL</p>
+</section>
+
+<script>
+const S=[...document.querySelectorAll('.scene')],D=S.map(s=>+s.dataset.d),T=D.reduce((a,b)=>a+b,0);
+let i=0,t0=0,paused=false,pausedAt=0;
+const prog=document.getElementById('prog'),tc=document.getElementById('tc');
+const start=D.map((_,k)=>D.slice(0,k).reduce((a,b)=>a+b,0));
+function show(k){S.forEach(s=>s.classList.remove('on'));void document.body.offsetWidth;S[k].classList.add('on');i=k}
+function go(k){k=Math.max(0,Math.min(S.length-1,k));t0=performance.now()-start[k]*1000;pausedAt=start[k]*1000;show(k)}
+function fmt(s){s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function tick(){const el=paused?pausedAt:performance.now()-t0,sec=el/1000;
+  if(!paused){let k=start.findLastIndex(x=>x<=sec);if(sec>=T)k=S.length-1;if(k!==i)show(k)}
+  prog.style.width=Math.min(100,sec/T*100)+'%';tc.textContent=fmt(Math.min(sec,T))+' / '+fmt(T)+(paused?'  ⏸':'');
+  requestAnimationFrame(tick)}
+addEventListener('keydown',e=>{
+  if(e.key===' '){paused=!paused;if(paused)pausedAt=performance.now()-t0;else t0=performance.now()-pausedAt;e.preventDefault()}
+  if(e.key==='ArrowRight')go(i+1);if(e.key==='ArrowLeft')go(i-1);if(e.key==='r')go(0);if(e.key==='h')tc.classList.toggle('hide')});
+go(0);tick();
+</script>
+</body>
+</html>
