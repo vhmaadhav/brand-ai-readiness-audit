@@ -1,111 +1,115 @@
 1
-00:00:00,400 --> 00:00:06,000
-We audit why AI assistants don't cite a brand, and why the visitors who do arrive don't stay.
+00:00:00,800 --> 00:00:06,000
+This is Brand AI-Readiness Audit, a skill marketplace for AI agents.
 
 2
-00:00:06,000 --> 00:00:12,000
-Eight skills, one entrypoint: audit-orchestrator. Python standard library only.
+00:00:06,000 --> 00:00:11,600
+Give it a URL, and it explains why AI assistants don't cite that brand, and what to fix first.
 
 3
-00:00:12,000 --> 00:00:18,000
-Our core insight: generative engine optimisation is a staged pipeline, not a ranking.
+00:00:12,500 --> 00:00:18,000
+Here's the architecture. Claude Code loads one entrypoint skill, audit-orchestrator.
 
 4
-00:00:18,000 --> 00:00:25,000
-A page must clear every gate in order, and the gate it fails decides the fix.
+00:00:18,000 --> 00:00:23,500
+It checks the URL is safe to audit, then crawls the site once into a shared page inventory.
 
 5
-00:00:25,000 --> 00:00:32,000
-Fail at selection, and the fix is to declare the entity, not to write more content.
+00:00:23,500 --> 00:00:29,000
+Four detector skills read that inventory independently: selection, absorption, trust and engagement.
 
 6
-00:00:32,000 --> 00:00:39,000
-Our signals come from measured data: 602 prompts and 21,143 citations across three AI engines.
+00:00:29,000 --> 00:00:33,600
+Every finding passes an advisory critic before it's composed into one report.
 
 7
-00:00:39,000 --> 00:00:46,000
-Only 76.44% of pages an engine had already chosen to cite could actually be fetched.
+00:00:34,500 --> 00:00:40,000
+We treat AI visibility as a series of gates, not a single score.
 
 8
-00:00:46,000 --> 00:00:52,000
-So reachability is a gate, with per-type JavaScript render-fault diagnosis.
+00:00:40,000 --> 00:00:46,000
+A page has to clear each gate in order, and each gate has its own fix.
 
 9
-00:00:52,000 --> 00:00:58,000
-Being cited is not the same as mattering.
+00:00:46,000 --> 00:00:53,600
+If a page stops at selection, more content won't help. It needs a clear entity declaration.
 
 10
-00:00:58,000 --> 00:01:04,000
-Perplexity cites 2.4× more sources than ChatGPT, but absorbs each about a quarter as deeply.
+00:00:54,500 --> 00:01:00,000
+Every check traces back to measured data: 602 prompts and 21,143 citations.
 
 11
-00:01:04,000 --> 00:01:10,000
-So selection and absorption are audited separately, because they need different fixes.
+00:01:00,000 --> 00:01:06,000
+For example, only 76% of the pages an engine chose to cite could actually be fetched.
 
 12
-00:01:10,000 --> 00:01:17,000
-Evidence genres (code, numbers, definitions, comparisons) measurably lift absorption.
+00:01:06,000 --> 00:01:11,600
+Each measured fact maps to a specific check in the code.
 
 13
-00:01:17,000 --> 00:01:24,000
-'Add an FAQ' is standard advice, and the only genre the research measures as negative.
+00:01:12,500 --> 00:01:18,000
+Pages with code, numbers, definitions and comparisons shape answers more.
 
 14
-00:01:24,000 --> 00:01:30,000
-Our marketplace never recommends it, and a regression test enforces that.
+00:01:18,000 --> 00:01:23,000
+FAQ formatting is the one pattern that measured negative.
 
 15
-00:01:30,000 --> 00:01:37,000
-Thresholds sit at the bottom quartile: a floor to clear, not a target to chase.
+00:01:23,000 --> 00:01:27,600
+So the audit never tells you to add an FAQ, and a test makes sure of it.
 
 16
-00:01:37,000 --> 00:01:45,000
-Flag everything below the top quartile and you fire on most of the web. Precision first.
+00:01:28,500 --> 00:01:34,000
+Thresholds sit at the bottom quartile. It's a floor, not a target.
 
 17
-00:01:45,000 --> 00:01:52,000
-Severity asks how much it costs. Critical means the brand cannot enter the candidate pool.
+00:01:34,000 --> 00:01:39,600
+That keeps the audit precise. It flags the pages that really fall short.
 
 18
-00:01:52,000 --> 00:01:59,000
-Claim level asks how sure we are, and caps severity. A mechanism guess can never be critical.
+00:01:40,500 --> 00:01:46,000
+Severity says how much a problem costs. Claim level says how sure we are.
 
 19
-00:01:59,000 --> 00:02:05,000
-A causal promise is never a finding; it becomes a labelled hypothesis instead.
+00:01:46,000 --> 00:01:52,000
+A direct observation can be critical. An interpretation is capped at medium.
 
 20
-00:02:05,000 --> 00:02:10,000
-The cap is enforced three times: at construction, in advisory review, and in schema validation.
+00:01:52,000 --> 00:01:58,000
+A causal promise is never reported as a finding. It's kept as a hypothesis.
 
 21
-00:02:10,000 --> 00:02:16,000
-Detectors are optimistic by design, so every finding must survive an advisory critic.
+00:01:58,000 --> 00:02:03,600
+That cap is checked three times: at construction, in review, and at schema validation.
 
 22
-00:02:16,000 --> 00:02:23,000
-It needs a real URL and observed value, a real threshold breach, and enough sampled pages.
+00:02:04,500 --> 00:02:10,000
+Detectors are optimistic by design, so every finding has to get past a critic.
 
 23
-00:02:23,000 --> 00:02:29,000
-Weak claims are dropped or downgraded. Nothing reaches the report without passing the critic.
+00:02:10,000 --> 00:02:16,000
+It needs a real URL and a measured value, and the value has to break the threshold.
 
 24
-00:02:29,000 --> 00:02:35,000
-Three symptoms of one JavaScript render fault merge into a single root-cause fix.
+00:02:16,000 --> 00:02:22,000
+Weak claims are dropped or downgraded, and the reason is logged in the report.
 
 25
-00:02:35,000 --> 00:02:41,000
-Every suggested action names its mechanism and how to verify the fix.
+00:02:22,000 --> 00:02:29,600
+Symptoms of one cause, like a JavaScript-only page, are merged into a single fix.
 
 26
-00:02:41,000 --> 00:02:47,000
-Priority is not severity. Findings sort by severity, then pipeline order: causes first.
+00:02:30,500 --> 00:02:36,000
+Each finding becomes an action with steps, effort, the mechanism, and a way to verify it.
 
 27
-00:02:47,000 --> 00:02:52,000
-We prefer adding the missing fact over rewriting the page; rewrites measurably backfired.
+00:02:36,000 --> 00:02:42,000
+Findings are sorted by severity, then pipeline order, so root causes come first.
 
 28
-00:02:52,000 --> 00:02:59,600
-Now live: Claude Code with Claude Opus 5.5, on a site the audit has never seen.
+00:02:42,000 --> 00:02:49,600
+And we'd rather add a missing fact than rewrite a page. Rewrites measurably backfired.
+
+29
+00:02:50,500 --> 00:02:59,400
+Now let's run it live, with Claude Code and Claude Opus 5.5, on a site it hasn't seen.

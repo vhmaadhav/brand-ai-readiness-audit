@@ -4,431 +4,468 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI-Readiness Methodology</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0e0f13;--panel:#171922;--panel2:#1e2130;--ink:#f3f1ea;--mute:#8b8fa3;--accent:#ff4d2e;--ok:#3ecf8e;--warn:#ffb020;--hi:#ff7a45;--line:#2a2d3a;
-  --sans:'Space Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+:root{--bg:#000;--card:#161617;--card2:#1d1d1f;--edge:rgba(255,255,255,.10);--ink:#f5f5f7;--mute:#86868b;--dim:#6e6e73;
+  --blue:#2997ff;--blue2:#5ac8fa;--red:#ff453a;--orange:#ff9f0a;--yellow:#ffd60a;--green:#30d158;
+  --ease:cubic-bezier(.22,1,.36,1);--sans:'Inter',-apple-system,system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#000;overflow:hidden}
-#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden;transform-origin:center}
-#stage::before{content:"";position:absolute;inset:-20px;pointer-events:none;opacity:.07;z-index:50;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .4s steps(3) infinite}
-@keyframes grain{33%{transform:translate(-10px,6px)}66%{transform:translate(8px,-5px)}}
-.scene{position:absolute;inset:0;display:none;padding:150px 120px 200px}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;color:var(--ink);font-family:var(--sans);overflow:hidden;
+  -webkit-font-smoothing:antialiased;background:radial-gradient(1200px 600px at 50% -10%,rgba(41,151,255,.10),transparent 70%),#000}
+.scene{position:absolute;inset:0;display:none;animation:sin .9s var(--ease) both,sout .6s ease-in both;animation-delay:0s,calc(var(--dur) - .6s)}
 .scene.on{display:block}
-/* shared entrances (steps = stop-motion feel) */
-.s{animation:pop .55s steps(5) both;animation-delay:var(--d,0s)}
-@keyframes pop{0%{opacity:0;transform:translateY(26px) rotate(-2deg) scale(.94)}60%{opacity:1;transform:translateY(-4px) rotate(.8deg)}100%{opacity:1;transform:none}}
-.flip{animation:flip .6s steps(6) both;animation-delay:var(--d,0s)}
-@keyframes flip{0%{opacity:0;transform:perspective(600px) rotateX(90deg)}100%{opacity:1;transform:none}}
-.stamp{animation:stamp .45s steps(4) both;animation-delay:var(--d,0s)}
-@keyframes stamp{0%{opacity:0;transform:scale(3) rotate(-14deg)}70%{opacity:1;transform:scale(.92) rotate(-9deg)}100%{opacity:1;transform:scale(1) rotate(-10deg)}}
-.kicker{font-family:var(--mono);color:var(--accent);font-size:22px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:22px}
-h1{font-size:128px;line-height:.95;letter-spacing:-.035em;font-weight:700}
-h2{font-size:64px;line-height:1.05;letter-spacing:-.02em;font-weight:700;margin-bottom:46px}
-em{color:var(--accent);font-style:normal}
-.lead{font-size:30px;color:var(--mute);max-width:1400px;line-height:1.35}
-.hl{position:relative;color:var(--accent)}
-.hl::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:12px;background:var(--accent);transform-origin:left;animation:sweep .8s steps(8) both;animation-delay:var(--d2,0s)}
-@keyframes sweep{from{transform:scaleX(0)}}
-/* HUD */
-#anchor{position:absolute;right:120px;top:56px;font-family:var(--mono);font-size:20px;color:var(--ok);background:#0f1f18;border:1px solid #1f4a36;padding:10px 18px;border-radius:8px;z-index:40;max-width:1100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#anchor::before{content:"▸ code  ";color:var(--mute)}
-#anchor:empty{display:none}
-#brand{position:absolute;left:120px;top:62px;font-family:var(--mono);font-size:18px;color:var(--mute);z-index:40;letter-spacing:.08em}
-#prog{position:absolute;left:0;top:0;height:6px;background:var(--accent);z-index:40}
-#sub{position:absolute;left:50%;bottom:56px;transform:translateX(-50%);max-width:1720px;width:max-content;text-align:center;z-index:45;font-size:36px;line-height:1.3;font-weight:500;
-  background:rgba(0,0,0,.78);padding:14px 30px;border-radius:10px;color:#fff;text-shadow:0 2px 4px #000}
-#sub:empty{display:none}
-#wipe{position:absolute;top:0;bottom:0;width:60%;background:var(--accent);z-index:48;left:-130%;transform:skewX(-12deg)}
-#wipe::after{content:"";position:absolute;inset:0 -30% 0 auto;width:30%;background:var(--ink)}
-/* S1 tiles */
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:70px;max-width:1500px}
-.tile{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:18px 22px;font-family:var(--mono);font-size:21px}
-.tile small{display:block;font-family:var(--sans);color:var(--mute);font-size:17px;margin-top:6px}
-.tile.entry{border-color:var(--accent);box-shadow:6px 6px 0 var(--accent)}
-/* S2 pipeline */
-.pipe{position:relative;display:flex;gap:35px;margin-top:40px}
-.gate{flex:none;width:210px;height:150px;background:var(--panel);border:3px solid var(--line);border-radius:14px;padding:18px;font-weight:700;font-size:25px;position:relative}
-.gate small{display:block;font-weight:400;color:var(--mute);font-family:var(--mono);font-size:16px;margin-top:10px}
-.gate.critic{border-color:var(--ok)}
-.gate .n{position:absolute;right:14px;top:10px;font-family:var(--mono);color:var(--mute);font-size:16px}
-.gate.fail{animation:pop .55s steps(5) both,failg .4s steps(2) both;animation-delay:var(--d,0s),var(--f,0s)}
-@keyframes failg{to{border-color:var(--accent);background:#2a1512;box-shadow:0 0 0 6px rgba(255,77,46,.25)}}
-.token{position:absolute;top:175px;left:80px;width:50px;height:62px;background:var(--ink);border-radius:4px 16px 4px 4px;animation:travel 4s steps(16) both;animation-delay:7s}
-.token::after{content:"";position:absolute;left:10px;right:10px;top:16px;height:4px;background:#999;box-shadow:0 10px #999,0 20px #999}
-@keyframes travel{0%{opacity:0;left:80px}8%{opacity:1;left:80px}35%{left:325px}65%,100%{left:570px;background:var(--ink)}80%{transform:translateX(-8px)}85%{transform:translateX(8px)}90%,100%{transform:none;background:var(--accent);opacity:1}}
-.verdict{margin-top:130px;font-size:34px;background:var(--panel2);border-left:8px solid var(--accent);padding:22px 30px;max-width:1300px}
-.verdict code{font-family:var(--mono);color:var(--ok);font-size:28px}
-/* S3 */
-.stats{display:flex;gap:110px}
-.stat b{display:block;font-size:84px;font-weight:700;letter-spacing:-.03em}
-.stat span{color:var(--mute);font-family:var(--mono);font-size:20px}
-.split{display:flex;gap:120px;align-items:center;margin-top:60px}
-.big{font-size:220px;font-weight:700;line-height:.9;color:var(--accent);letter-spacing:-.05em}
-.big + p{font-size:26px;color:var(--mute);font-family:var(--mono);margin-top:10px}
-.pages{display:grid;grid-template-columns:repeat(10,58px);gap:16px}
-.pg{width:58px;height:72px;background:var(--ink);border-radius:4px 16px 4px 4px;position:relative}
-.pg.x{animation:pop .55s steps(5) both,dead .5s steps(3) both;animation-delay:var(--d,0s),var(--f,0s)}
-@keyframes dead{to{background:#3a3d4a;box-shadow:inset 0 0 0 3px var(--accent)}}
-.pg.x::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:var(--accent);font-size:40px;font-weight:700;opacity:0;animation:show .1s both;animation-delay:var(--f,0s)}
-@keyframes show{to{opacity:1}}
-/* S4 */
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:50px}
-.card{background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:34px}
-.card h3{font-size:30px;margin-bottom:26px}
-.hb{display:grid;grid-template-columns:170px 1fr;align-items:center;gap:16px;margin:16px 0;font-size:24px}
-.hb .track{height:46px;position:relative}
-.hb .fill{height:100%;border-radius:4px;transform-origin:left;animation:grow 1.2s steps(10) both;animation-delay:var(--d,0s);display:flex;align-items:center;justify-content:flex-end;padding-right:12px;font-family:var(--mono);font-size:22px;color:#111;font-weight:600}
+@keyframes sin{from{opacity:0;transform:scale(1.015)}}
+@keyframes sout{to{opacity:0}}
+.in{animation:in 1.1s var(--ease) both;animation-delay:var(--d,0s)}
+@keyframes in{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.dimin{animation:dimin 1.1s var(--ease) both;animation-delay:var(--d,0s)}
+@keyframes dimin{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:.38;transform:none;filter:none}}
+.head{position:absolute;left:120px;top:110px;width:1680px}
+.head h2{font-size:58px;font-weight:700;letter-spacing:-.032em;line-height:1.08}
+.head h2 span{color:var(--mute)}
+.eyebrow{font-size:20px;font-weight:600;color:var(--blue);margin-bottom:14px;letter-spacing:-.01em}
+.src{position:absolute;left:120px;top:52px;font-family:var(--mono);font-size:17px;color:var(--dim)}
+.src b{color:var(--mute);font-weight:500}
+#mark{position:absolute;right:120px;top:50px;font-size:17px;font-weight:600;color:var(--dim);letter-spacing:-.01em;z-index:40}
+.dia{position:absolute;left:120px;top:270px;width:1680px;height:660px}
+.wires{position:absolute;inset:0;overflow:visible}
+.w{fill:none;stroke:rgba(255,255,255,.22);stroke-width:2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--ease) both;animation-delay:var(--d,0s)}
+.w.hot{animation:draw 1.1s var(--ease) both,hot .8s ease both;animation-delay:var(--d,0s),var(--h,0s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes hot{to{stroke:var(--blue);stroke-width:3}}
+.w.red{stroke:rgba(255,69,58,.5)}
+.node{z-index:1;position:absolute;background:var(--card);border:1px solid var(--edge);border-radius:18px;padding:18px 20px;height:100px;display:flex;flex-direction:column;justify-content:center}
+.node b{font-size:20px;font-weight:600;letter-spacing:-.015em;white-space:nowrap}
+.node span{font-size:16px;color:var(--mute);margin-top:5px;white-space:nowrap}
+.node.key{background:linear-gradient(180deg,#1f2a3a,#141a24);border-color:rgba(41,151,255,.45)}
+.node.lit{animation:dimin 1.1s var(--ease) both,lit .8s ease both;animation-delay:var(--d,0s),var(--h,0s)}
+@keyframes lit{to{opacity:1;border-color:var(--blue);background:#14233a}}
+.node.bad{animation:in 1.1s var(--ease) both,bad .6s ease both;animation-delay:var(--d,0s),var(--h,0s)}
+@keyframes bad{to{border-color:var(--red);background:#2a1414}}
+.lbl{position:absolute;font-size:16px;color:var(--mute);white-space:nowrap}
+.pk{position:absolute;left:0;top:0;width:14px;height:14px;border-radius:50%;background:var(--blue);box-shadow:0 0 18px 2px rgba(41,151,255,.8);offset-rotate:0deg;
+  animation:move var(--t,2.4s) cubic-bezier(.65,0,.35,1) both;animation-delay:var(--d,0s)}
+@keyframes move{0%{offset-distance:0%;opacity:0}6%{opacity:1}94%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.hero{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:80px}
+.hero h1{font-size:132px;font-weight:700;letter-spacing:-.045em;line-height:1;background:linear-gradient(180deg,#fff 30%,#9a9aa0);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:10px}
+.hero p{font-size:36px;color:var(--mute);margin-top:26px;font-weight:500;letter-spacing:-.02em}
+.pills{display:flex;gap:12px;margin-top:70px;flex-wrap:wrap;justify-content:center;max-width:1500px}
+.pill{font-size:18px;color:var(--ink);background:var(--card2);border:1px solid var(--edge);border-radius:999px;padding:10px 20px;font-weight:500}
+.pill.key{border-color:rgba(41,151,255,.6);color:#cfe6ff}
+.bars{position:absolute;left:0;top:10px;width:1680px}
+.brow{display:grid;grid-template-columns:320px 1200px 160px;align-items:center;height:78px}
+.brow .n{font-size:26px;font-weight:500;letter-spacing:-.015em}
+.brow .v{font-size:26px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.btrack{position:relative;height:38px}
+.btrack::before{content:"";position:absolute;left:120px;top:-20px;bottom:-20px;width:1px;background:rgba(255,255,255,.2)}
+.bfill{position:absolute;left:121px;top:0;bottom:0;border-radius:0 10px 10px 0;background:linear-gradient(90deg,var(--blue),var(--blue2));transform-origin:left;animation:grow 1.4s var(--ease) both;animation-delay:var(--d,0s)}
+.bfill.neg{left:auto;right:calc(100% - 120px);border-radius:10px 0 0 10px;background:var(--red);transform-origin:right}
 @keyframes grow{from{transform:scaleX(0)}}
-.cg{background:var(--ok)}.px{background:var(--accent)}
-.pills{display:flex;gap:30px;margin-top:50px}
-.pill{font-family:var(--mono);font-size:24px;border:2px solid var(--line);border-radius:999px;padding:14px 26px}
-.pill b{color:var(--accent)}
-/* S5 */
-.gbars{display:grid;grid-template-columns:320px 1100px 150px;row-gap:20px;align-items:center;position:relative}
-.gbars .lbl{font-size:30px}
-.gbars .v{font-family:var(--mono);font-size:28px;text-align:right}
-.gtrack{position:relative;height:52px}
-.gtrack::before{content:"";position:absolute;left:120px;top:-12px;bottom:-12px;width:2px;background:var(--mute)}
-.gfill{position:absolute;left:122px;top:0;bottom:0;background:var(--ok);border-radius:0 4px 4px 0;transform-origin:left;animation:grow 1s steps(8) both;animation-delay:var(--d,0s)}
-.gfill.neg{left:auto;right:calc(100% - 120px);background:var(--accent);border-radius:4px 0 0 4px;transform-origin:right}
-.faq .lbl,.faq .v{color:var(--accent);font-weight:700}
-.shake{animation:pop .55s steps(5) both,shake .5s steps(6) both;animation-delay:var(--d,0s),var(--f,0s)}
-@keyframes shake{25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-6px)}}
-.stampbox{position:absolute;right:230px;bottom:-30px;border:8px solid var(--accent);color:var(--accent);font-size:56px;font-weight:700;padding:10px 26px;letter-spacing:.04em;border-radius:10px;background:rgba(14,15,19,.85)}
-/* S6 */
-.scale{position:relative;height:260px;margin:30px 0 40px;max-width:1680px}
-.axis{position:absolute;left:0;right:0;top:150px;height:4px;background:var(--line)}
-.tick{position:absolute;top:170px;font-family:var(--mono);color:var(--mute);font-size:20px;transform:translateX(-50%)}
-.marker{position:absolute;top:30px;height:170px;width:6px;transform-origin:bottom}
-.marker span{position:absolute;top:-6px;left:14px;white-space:nowrap;font-family:var(--mono);font-size:22px}
-.marker.floor{background:var(--accent)}.marker.floor span{color:var(--accent)}
-.marker.top{background:var(--mute)}.marker.top span{color:var(--mute);left:auto;right:14px}
-.rise{animation:rise .6s steps(6) both;animation-delay:var(--d,0s)}
+.brow.faq .n,.brow.faq .v{color:var(--red)}
+.note{position:absolute;font-size:24px;color:var(--mute);letter-spacing:-.01em}
+.note b{color:var(--ink);font-weight:600}
+.axis{position:absolute;left:0;width:1680px;top:260px;height:2px;background:rgba(255,255,255,.18);transform-origin:left;animation:grow 1.2s var(--ease) both;animation-delay:var(--d,0s)}
+.tick{position:absolute;top:290px;font-size:18px;color:var(--dim);transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.mk{position:absolute;top:90px;height:170px;width:2px;transform-origin:bottom;animation:rise 1s var(--ease) both;animation-delay:var(--d,0s)}
 @keyframes rise{from{transform:scaleY(0)}}
-.dot{position:absolute;top:128px;width:48px;height:48px;border-radius:50%;background:var(--ok);margin-left:-24px;border:4px solid var(--bg)}
-.dot.low{animation:pop .55s steps(5) both,red .3s steps(2) both;animation-delay:var(--d,0s),var(--f,0s)}
-@keyframes red{to{background:var(--accent)}}
-.mini{display:flex;gap:70px;font-size:28px}
-.mini div{background:var(--panel);border-radius:12px;padding:20px 28px}
-.mini b{color:var(--accent);font-family:var(--mono)}
-/* S7 */
-.sevt{display:grid;grid-template-columns:150px 760px 330px;font-size:29px;max-width:1300px}
-.sevt>div{padding:13px 20px;border-bottom:2px solid var(--line);position:relative}
-.sevt .th{color:var(--mute);font-family:var(--mono);font-size:20px;text-transform:uppercase;letter-spacing:.08em}
-.sev{white-space:nowrap;font-family:var(--mono);font-weight:600;padding:6px 16px;border-radius:6px;font-size:26px}
-.c{background:var(--accent);color:#fff}.h{background:var(--hi);color:#111}.m{background:var(--warn);color:#111}.n4{background:#333;color:var(--mute)}
-.strike::after{content:"";position:absolute;left:10px;right:10px;top:50%;height:5px;background:var(--accent);transform-origin:left;animation:sweep .6s steps(6) both;animation-delay:var(--f,0s)}
-.locks{display:flex;gap:30px;margin-top:30px}
-.lock{background:var(--panel);border:2px solid var(--ok);border-radius:12px;padding:16px 24px;font-size:24px}
-.lock code{display:block;font-family:var(--mono);color:var(--ok);font-size:19px;margin-top:6px}
-/* S8 critic */
-.lane{position:relative;height:520px}
-.critbox{position:absolute;left:590px;top:0;width:380px;height:500px;border:4px solid var(--ok);border-radius:18px;background:#0f1a16;padding:22px}
-.critbox h4{font-size:28px;color:var(--ok);margin-bottom:16px}
-.cg8{font-family:var(--mono);font-size:22px;padding:11px 14px;margin:7px 0;border-radius:8px;background:var(--panel);color:var(--mute);animation:lit .3s steps(2) both;animation-delay:var(--d,0s)}
-@keyframes lit{to{color:var(--ink);background:#1f4a36}}
-.fnd{position:absolute;left:0;width:470px;padding:16px 20px;border-radius:10px;background:var(--panel2);border:2px solid var(--line);font-size:23px;opacity:0}
-.fnd small{display:block;font-family:var(--mono);font-size:17px;margin-top:4px}
-.fnd.pass{animation:pass 3s steps(18) both;animation-delay:var(--d,0s)}
-.fnd.drop{animation:drop 3s steps(18) both;animation-delay:var(--d,0s)}
-.fnd.down{animation:down 3s steps(18) both;animation-delay:var(--d,0s)}
-@keyframes pass{0%{opacity:0;transform:translate(-40px,0)}10%{opacity:1;transform:none}45%{transform:translate(560px,0)}60%{transform:translate(560px,0)}100%{opacity:1;transform:translate(1150px,0);border-color:var(--ok)}}
-@keyframes down{0%{opacity:0;transform:translate(-40px,0)}10%{opacity:1;transform:none}45%{transform:translate(560px,0)}60%{transform:translate(560px,0)}100%{opacity:1;transform:translate(1150px,0);border-color:var(--warn)}}
-@keyframes drop{0%{opacity:0;transform:translate(-40px,0)}10%{opacity:1;transform:none}45%{transform:translate(460px,0);border-color:var(--line)}55%{transform:translate(460px,0);border-color:var(--accent)}100%{opacity:0;transform:translate(420px,420px) rotate(-24deg);border-color:var(--accent)}}
-.merge{position:absolute;left:0;top:0;width:470px}
-.mchip{position:absolute;left:0;width:470px;padding:14px 20px;border-radius:10px;border:2px dashed var(--mute);font-family:var(--mono);font-size:21px;color:var(--mute);animation:mergein 2s steps(10) both;animation-delay:var(--d,0s)}
-@keyframes mergein{0%{opacity:0}15%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(var(--y))}}
-.root{position:absolute;left:0;top:380px;width:470px;padding:18px 20px;border-radius:12px;border:3px solid var(--ok);background:#0f1f18;font-size:24px}
-.root small{display:block;font-family:var(--mono);color:var(--ok);font-size:18px;margin-top:6px}
-/* S9 */
-.two{display:grid;grid-template-columns:860px 1fr;gap:60px}
-.fix{font-family:var(--mono);font-size:25px;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:30px 34px;line-height:2}
-.fix .k{color:var(--mute);display:inline-block;width:210px}
-.type{display:block;overflow:hidden;white-space:nowrap;width:0;animation:type 1.4s steps(28) both;animation-delay:var(--d,0s)}
-@keyframes type{to{width:var(--w)}}
-.sorted{position:relative;height:320px}
-.srow{position:absolute;left:0;right:0;height:62px;display:flex;align-items:center;gap:18px;background:var(--panel);border-radius:10px;padding:0 20px;font-size:23px;animation:pop .55s steps(5) both,reorder .9s steps(6) both;animation-delay:var(--d,0s),10s}
+.mk span{position:absolute;top:-34px;white-space:nowrap;font-size:20px;font-weight:600;transform:translateX(-50%)}
+.mk.floor{background:var(--blue)}.mk.floor span{color:var(--blue)}
+.mk.top{background:rgba(255,255,255,.4)}.mk.top span{color:var(--mute);transform:translateX(-90%)}
+.dot{position:absolute;top:243px;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:#3a3a3c;border:3px solid #000}
+.dot.low{animation:in 1.1s var(--ease) both,dred .6s ease both;animation-delay:var(--d,0s),var(--h,0s)}
+@keyframes dred{to{background:var(--red)}}
+.dot.ok{animation:in 1.1s var(--ease) both,dgrn .6s ease both;animation-delay:var(--d,0s),var(--h,0s)}
+@keyframes dgrn{to{background:var(--green)}}
+.stats{position:absolute;left:0;top:420px;display:flex;gap:24px}
+.stat{background:var(--card);border:1px solid var(--edge);border-radius:18px;padding:22px 28px;min-width:380px}
+.stat b{font-size:40px;font-weight:700;letter-spacing:-.03em;color:var(--blue)}
+.stat span{display:block;font-size:18px;color:var(--mute);margin-top:4px}
+.chip{display:inline-block;font-size:15px;font-weight:600;padding:6px 12px;border-radius:8px;margin-left:auto}
+.c-red{background:rgba(255,69,58,.18);color:var(--red)}.c-or{background:rgba(255,159,10,.18);color:var(--orange)}
+.c-ye{background:rgba(255,214,10,.16);color:var(--yellow)}.c-gr{background:rgba(255,255,255,.08);color:var(--mute)}
+.node.row{flex-direction:row;align-items:center;justify-content:flex-start;gap:14px}
+.node.row .chip{margin-top:0}
+.tok{position:absolute;left:0;top:0;width:220px;height:44px;border-radius:12px;background:var(--card2);border:1px solid rgba(255,255,255,.18);font-size:15px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;white-space:nowrap;offset-rotate:0deg;opacity:0;animation-duration:3.6s;animation-timing-function:cubic-bezier(.45,0,.25,1);animation-fill-mode:both;animation-delay:var(--d,0s)}
+.tok.pass{animation-name:tpass}.tok.drop{animation-name:tdrop}.tok.down{animation-name:tdown}
+@keyframes tpass{0%{offset-distance:0%;opacity:0}8%{opacity:1}88%{opacity:1;border-color:var(--green)}100%{offset-distance:100%;opacity:0;border-color:var(--green)}}
+@keyframes tdown{0%{offset-distance:0%;opacity:0}8%{opacity:1}45%{border-color:rgba(255,255,255,.18)}55%{border-color:var(--orange);color:var(--orange)}88%{opacity:1}100%{offset-distance:100%;opacity:0;border-color:var(--orange);color:var(--orange)}}
+@keyframes tdrop{0%{offset-distance:0%;opacity:0}8%{opacity:1}55%{offset-distance:var(--k);border-color:rgba(255,255,255,.18)}65%{offset-distance:var(--k);border-color:var(--red)}100%{offset-distance:100%;opacity:.75;border-color:var(--red);color:var(--red)}}
+.cp{position:absolute;width:16px;height:16px;border-radius:50%;background:#000;border:2px solid rgba(255,255,255,.4);margin:-8px 0 0 -8px}
+.card{z-index:1;position:absolute;background:var(--card);border:1px solid var(--edge);border-radius:22px;padding:28px 30px}
+.card h4{font-size:15px;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+.card .t{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:18px}
+.kv{display:grid;grid-template-columns:150px 1fr;font-size:18px;padding:9px 0;border-top:1px solid var(--edge)}
+.kv i{font-style:normal;color:var(--mute)}
+.srow{position:absolute;left:30px;right:30px;height:56px;display:flex;align-items:center;gap:14px;background:var(--card2);border-radius:12px;padding:0 16px;font-size:18px;font-weight:500;
+  animation:in 1.1s var(--ease) both,reorder 1.2s var(--ease) both;animation-delay:var(--d,0s),var(--h,0s)}
 @keyframes reorder{to{transform:translateY(var(--m))}}
-.srow .lay{margin-left:auto;font-family:var(--mono);color:var(--mute);font-size:18px}
-.sortlbl{font-family:var(--mono);color:var(--mute);font-size:20px;margin-bottom:16px}
-.sortlbl b{color:var(--ok)}
-/* S10 */
-.term{margin-top:60px;background:#07080b;border:2px solid var(--line);border-radius:14px;padding:30px 36px;font-family:var(--mono);font-size:34px;width:1100px;line-height:1.8}
-.term .p{color:var(--ok)}
-.term .type{display:inline-block;vertical-align:bottom}
-.caret{display:inline-block;width:18px;height:38px;background:var(--ink);vertical-align:middle;animation:blink 1s steps(1) infinite}
+.srow .chip{margin-left:0;min-width:84px;text-align:center}
+.srow .lay{margin-left:auto;font-size:15px;color:var(--mute)}
+.term{margin-top:60px;background:#0b0b0c;border:1px solid var(--edge);border-radius:16px;padding:22px 30px;font-family:var(--mono);font-size:28px;color:var(--ink);text-align:left;width:620px}
+.term .p{color:var(--green)}
+.type{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:0;animation:type .9s steps(6) both;animation-delay:var(--d,0s)}
+@keyframes type{to{width:var(--w)}}
+.caret{display:inline-block;width:14px;height:30px;background:var(--ink);vertical-align:middle;margin-left:6px;animation:blink 1.1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
+#sub{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);width:max-content;max-width:1640px;text-align:center;z-index:45;font-size:34px;line-height:1.3;font-weight:500;letter-spacing:-.01em;
+  background:rgba(22,22,23,.82);border:1px solid rgba(255,255,255,.08);padding:12px 28px;border-radius:14px;color:#fff}
+#sub:empty{display:none}
 </style>
 </head>
 <body>
 <div id="stage">
-<div id="prog"></div>
-<div id="brand">BRAND AI-READINESS AUDIT · ROUND 4</div>
-<div id="anchor"></div>
+<div id="mark">Brand AI-Readiness Audit</div>
 
-<!-- 1 · 0–12 -->
-<section class="scene" data-d="12" data-anchor='marketplace.json → "entrypoint": "audit-orchestrator"'>
-  <div class="kicker s" style="--d:.2s">Adobe University Hackathon · Round 4 · Methodology</div>
-  <h1 class="s" style="--d:.6s">Brand AI-Readiness<br><span class="hl" style="--d2:1.4s">Audit</span></h1>
-  <p class="lead s" style="--d:2.2s;margin-top:40px">Why AI assistants don't cite a brand — and why the visitors who arrive don't stay.</p>
-  <div class="tiles">
-    <div class="tile entry flip" style="--d:3.4s">audit-orchestrator<small>entrypoint · compose</small></div>
-    <div class="tile flip" style="--d:3.8s">url-validation<small>preflight</small></div>
-    <div class="tile flip" style="--d:4.2s">crawl-reachability<small>reachability</small></div>
-    <div class="tile flip" style="--d:4.6s">structured-data-identity<small>selection</small></div>
-    <div class="tile flip" style="--d:5.0s">evidence-density<small>absorption</small></div>
-    <div class="tile flip" style="--d:5.4s">freshness-corroboration<small>trust</small></div>
-    <div class="tile flip" style="--d:5.8s">engagement-audit<small>engagement</small></div>
-    <div class="tile flip" style="--d:6.2s">advisory-review<small>verification</small></div>
-  </div>
-</section>
-
-<!-- 2 · 12–32 -->
-<section class="scene" data-d="20" data-anchor="skills/audit-orchestrator/scripts/run_audit.py:112  run_stage()">
-  <div class="kicker s">Core idea</div>
-  <h2 class="s" style="--d:.4s">A staged pipeline, not a ranking.<br><em>The gate a page fails decides the fix.</em></h2>
-  <div class="pipe">
-    <div class="gate s" style="--d:1.2s"><span class="n">1</span>Preflight<small>safe · in scope</small></div>
-    <div class="gate s" style="--d:2.0s"><span class="n">2</span>Reach&shy;ability<small>can it be fetched</small></div>
-    <div class="gate fail s" style="--d:2.8s;--f:11s"><span class="n">3</span>Selection<small>is the entity clear</small></div>
-    <div class="gate s" style="--d:3.6s"><span class="n">4</span>Absorption<small>does it shape answers</small></div>
-    <div class="gate s" style="--d:4.4s"><span class="n">5</span>Trust<small>current · corroborated</small></div>
-    <div class="gate s" style="--d:5.2s"><span class="n">6</span>Engage&shy;ment<small>does the human stay</small></div>
-    <div class="gate critic s" style="--d:6.0s"><span class="n">7</span>Critic<small>drop · downgrade · merge</small></div>
-    <div class="token"></div>
-  </div>
-  <div class="verdict s" style="--d:12s">Fails at <em>Selection</em> → fix is <code>declare the entity: Organization JSON-LD + sameAs</code>, not "write more content".</div>
-</section>
-
-<!-- 3 · 32–52 -->
-<section class="scene" data-d="20" data-anchor="lib/geo_audit/renderfaults.py:160  diagnose() → empty_shell · noscript_gap">
-  <div class="kicker s">Field research · arXiv 2604.25707</div>
-  <div class="stats">
-    <div class="stat s" style="--d:.5s"><b data-count="602" data-at=".5" data-dur="1.6">0</b><span>prompts</span></div>
-    <div class="stat s" style="--d:1.3s"><b data-count="21143" data-at="1.3" data-dur="2">0</b><span>citations</span></div>
-    <div class="stat s" style="--d:2.1s"><b>3</b><span>ChatGPT · Google AIO · Perplexity</span></div>
-  </div>
-  <div class="split">
-    <div class="s" style="--d:6s"><div class="big" data-count="76.44" data-dec="2" data-suffix="%" data-at="6" data-dur="2.2">0%</div><p>fetch success rate</p></div>
-    <div class="pages">
-      <!-- 20 pages; 5 unreachable -->
-      <div class="pg s" style="--d:9.0s"></div><div class="pg s" style="--d:9.1s"></div><div class="pg s" style="--d:9.2s"></div><div class="pg x" style="--d:9.3s;--f:11s"></div><div class="pg s" style="--d:9.4s"></div><div class="pg s" style="--d:9.5s"></div><div class="pg s" style="--d:9.6s"></div><div class="pg x" style="--d:9.7s;--f:11.4s"></div><div class="pg s" style="--d:9.8s"></div><div class="pg s" style="--d:9.9s"></div>
-      <div class="pg s" style="--d:10.0s"></div><div class="pg s" style="--d:10.1s"></div><div class="pg x" style="--d:10.2s;--f:11.8s"></div><div class="pg s" style="--d:10.3s"></div><div class="pg s" style="--d:10.4s"></div><div class="pg s" style="--d:10.5s"></div><div class="pg x" style="--d:10.6s;--f:12.2s"></div><div class="pg s" style="--d:10.7s"></div><div class="pg s" style="--d:10.8s"></div><div class="pg x" style="--d:10.9s;--f:12.6s"></div>
+<!-- 1 · 0–12 intro -->
+<section class="scene" data-d="12" style="--dur:12s">
+  <div class="hero">
+    <div class="eyebrow in" style="--d:.3s">Adobe University Hackathon · Round 4</div>
+    <h1 class="in" style="--d:.7s">Brand AI-Readiness Audit.</h1>
+    <p class="in" style="--d:1.6s">Why AI assistants don't cite a brand. And what to fix first.</p>
+    <div class="pills">
+      <span class="pill key in" style="--d:4.2s">audit-orchestrator</span>
+      <span class="pill in" style="--d:4.5s">url-validation</span>
+      <span class="pill in" style="--d:4.8s">crawl-reachability</span>
+      <span class="pill in" style="--d:5.1s">structured-data-identity</span>
+      <span class="pill in" style="--d:5.4s">evidence-density</span>
+      <span class="pill in" style="--d:5.7s">freshness-corroboration</span>
+      <span class="pill in" style="--d:6.0s">engagement-audit</span>
+      <span class="pill in" style="--d:6.3s">advisory-review</span>
     </div>
   </div>
-  <p class="lead s" style="--d:14s;margin-top:50px"><em>1 in 4</em> already-cited pages couldn't be fetched → reachability is a gate, with per-type JavaScript render-fault diagnosis.</p>
+  <div class="src in" style="--d:4s"><b>marketplace.json</b> · "entrypoint": "audit-orchestrator"</div>
 </section>
 
-<!-- 4 · 52–70 -->
-<section class="scene" data-d="18" data-anchor="check_structured_data.py:812 sameAs  ·  lib/geo_audit/influence.py:56 weights">
-  <div class="kicker s">Signal split</div>
-  <h2 class="s" style="--d:.4s">Being cited ≠ <em>mattering</em></h2>
-  <div class="cards">
-    <div class="card s" style="--d:1.2s"><h3>Citations per prompt <span style="color:var(--mute);font-weight:400">· selection</span></h3>
-      <div class="hb"><span>ChatGPT</span><div class="track"><div class="fill cg" style="width:42%;--d:2s">6.88</div></div></div>
-      <div class="hb"><span>Perplexity</span><div class="track"><div class="fill px" style="width:100%;--d:2.6s">16.35</div></div></div>
+<!-- 2 · 12–34 architecture -->
+<section class="scene" data-d="22" style="--dur:22s">
+  <div class="src in" style="--d:.4s"><b>skills/audit-orchestrator/scripts/run_audit.py:112</b> · run_stage()</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Architecture</div><h2 class="in" style="--d:.5s">One entrypoint. Eight skills. <span>One report.</span></h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:1.6s" d="M220,300 L280,300"/>
+      <path class="w" pathLength="1" style="--d:2.6s" d="M500,300 L560,300"/>
+      <path class="w" pathLength="1" style="--d:3.6s" d="M780,300 L840,300"/>
+      <path class="w" pathLength="1" style="--d:4.8s" d="M1060,300 C1105,300 1105,60 1150,60"/>
+      <path class="w" pathLength="1" style="--d:4.9s" d="M1060,300 C1105,300 1105,220 1150,220"/>
+      <path class="w" pathLength="1" style="--d:5.0s" d="M1060,300 C1105,300 1105,380 1150,380"/>
+      <path class="w" pathLength="1" style="--d:5.1s" d="M1060,300 C1105,300 1105,540 1150,540"/>
+      <path class="w" pathLength="1" style="--d:6.8s" d="M1430,60 C1455,60 1455,300 1480,300"/>
+      <path class="w" pathLength="1" style="--d:6.9s" d="M1430,220 C1455,220 1455,300 1480,300"/>
+      <path class="w" pathLength="1" style="--d:7.0s" d="M1430,380 C1455,380 1455,300 1480,300"/>
+      <path class="w" pathLength="1" style="--d:7.1s" d="M1430,540 C1455,540 1455,300 1480,300"/>
+      <path class="w" pathLength="1" style="--d:8.6s" d="M1580,350 L1580,630 Q1580,650 1560,650 L410,650 Q390,650 390,630 L390,600"/>
+      <path class="w" pathLength="1" style="--d:10.2s;stroke:rgba(41,151,255,.55)" d="M390,500 L390,350"/>
+    </svg>
+    <div class="node key in" style="left:0;top:250px;width:220px;--d:1s"><b>Claude Code</b><span>agent harness</span></div>
+    <div class="node key in" style="left:280px;top:250px;width:220px;--d:2s"><b>audit-orchestrator</b><span>entrypoint skill</span></div>
+    <div class="node in" style="left:560px;top:250px;width:220px;--d:3s"><b>url-validation</b><span>preflight · robots</span></div>
+    <div class="node in" style="left:840px;top:250px;width:220px;--d:4s"><b>crawl-reachability</b><span>page inventory</span></div>
+    <div class="node in" style="left:1150px;top:10px;width:280px;--d:5.4s"><b>structured-data-identity</b><span>selection</span></div>
+    <div class="node in" style="left:1150px;top:170px;width:280px;--d:5.6s"><b>evidence-density</b><span>absorption</span></div>
+    <div class="node in" style="left:1150px;top:330px;width:280px;--d:5.8s"><b>freshness-corroboration</b><span>trust</span></div>
+    <div class="node in" style="left:1150px;top:490px;width:280px;--d:6.0s"><b>engagement-audit</b><span>engagement</span></div>
+    <div class="node key in" style="left:1480px;top:250px;width:200px;--d:7.6s"><b>advisory-review</b><span>the critic</span></div>
+    <div class="node in" style="left:280px;top:500px;width:220px;--d:9.4s"><b>Report</b><span>json · md · html · pdf</span></div>
+    <div class="lbl in" style="left:830px;top:616px;--d:9s">compose · validate · render</div>
+    <div class="lbl in" style="left:404px;top:410px;--d:10.6s;color:var(--blue)">review loop</div>
+    <div class="lbl in" style="left:1150px;top:-34px;--d:6.4s">independent · same page inventory</div>
+    <div class="pk" style="--d:12s;--t:3.2s;offset-path:path('M110,300 L1060,300 C1105,300 1105,60 1150,60 L1430,60 C1455,60 1455,300 1480,300 L1580,300')"></div>
+    <div class="pk" style="--d:12s;--t:3.2s;offset-path:path('M110,300 L1060,300 C1105,300 1105,220 1150,220 L1430,220 C1455,220 1455,300 1480,300 L1580,300')"></div>
+    <div class="pk" style="--d:12s;--t:3.2s;offset-path:path('M110,300 L1060,300 C1105,300 1105,380 1150,380 L1430,380 C1455,380 1455,300 1480,300 L1580,300')"></div>
+    <div class="pk" style="--d:12s;--t:3.2s;offset-path:path('M110,300 L1060,300 C1105,300 1105,540 1150,540 L1430,540 C1455,540 1455,300 1480,300 L1580,300')"></div>
+    <div class="pk" style="--d:15.1s;--t:2.4s;offset-path:path('M1580,300 L1580,630 Q1580,650 1560,650 L410,650 Q390,650 390,630 L390,550')"></div>
+    <div class="pk" style="--d:17.6s;--t:1.4s;offset-path:path('M390,550 L390,300')"></div>
+  </div>
+</section>
+
+<!-- 3 · 34–54 gates -->
+<section class="scene" data-d="20" style="--dur:20s">
+  <div class="src in" style="--d:.4s"><b>README.md:34</b> · staged pipeline</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">The model</div><h2 class="in" style="--d:.5s">A series of gates. <span>Each with its own fix.</span></h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:1.8s" d="M272,95 L352,95"/>
+      <path class="w" pathLength="1" style="--d:2.2s" d="M624,95 L704,95"/>
+      <path class="w" pathLength="1" style="--d:2.6s" d="M976,95 L1056,95"/>
+      <path class="w" pathLength="1" style="--d:3.0s" d="M1328,95 L1408,95"/>
+      <path class="w" pathLength="1" style="--d:3.8s" d="M136,150 L136,330"/>
+      <path class="w hot" pathLength="1" style="--d:4.0s;--h:12s" d="M488,150 L488,330"/>
+      <path class="w" pathLength="1" style="--d:4.2s" d="M840,150 L840,330"/>
+      <path class="w" pathLength="1" style="--d:4.4s" d="M1192,150 L1192,330"/>
+      <path class="w" pathLength="1" style="--d:4.6s" d="M1544,150 L1544,330"/>
+    </svg>
+    <div class="node in" style="left:0;top:40px;width:272px;height:110px;--d:1s"><b>Reachability</b><span>Can a crawler fetch it?</span></div>
+    <div class="node bad" style="left:352px;top:40px;width:272px;height:110px;--d:1.4s;--h:10.6s"><b>Selection</b><span>Is the brand unambiguous?</span></div>
+    <div class="node in" style="left:704px;top:40px;width:272px;height:110px;--d:1.8s"><b>Absorption</b><span>Does it shape the answer?</span></div>
+    <div class="node in" style="left:1056px;top:40px;width:272px;height:110px;--d:2.2s"><b>Trust</b><span>Is it current and sourced?</span></div>
+    <div class="node in" style="left:1408px;top:40px;width:272px;height:110px;--d:2.6s"><b>Engagement</b><span>Does the visitor stay?</span></div>
+    <div class="node dimin" style="left:0;top:330px;width:272px;height:120px;--d:4.2s"><b>Server-render</b><span>the JavaScript route</span></div>
+    <div class="node lit" style="left:352px;top:330px;width:272px;height:120px;--d:4.4s;--h:12.4s"><b>Declare the entity</b><span>JSON-LD + sameAs</span></div>
+    <div class="node dimin" style="left:704px;top:330px;width:272px;height:120px;--d:4.6s"><b>Add verifiable facts</b><span>numbers, definitions</span></div>
+    <div class="node dimin" style="left:1056px;top:330px;width:272px;height:120px;--d:4.8s"><b>Date and source</b><span>every claim</span></div>
+    <div class="node dimin" style="left:1408px;top:330px;width:272px;height:120px;--d:5.0s"><b>Answer first</b><span>above the fold</span></div>
+    <div class="lbl in" style="left:150px;top:228px;--d:5.4s">if it stops here, fix this</div>
+    <div class="pk" style="--d:6.4s;--t:4.2s;width:18px;height:18px;offset-path:path('M-60,95 L488,95')"></div>
+    <div class="note in" style="left:0;top:520px;--d:13.4s">A page stopped at selection won't be helped by <b>more content</b>. It needs a <b>clear entity declaration</b>.</div>
+  </div>
+</section>
+
+<!-- 4 · 54–72 research → checks -->
+<section class="scene" data-d="18" style="--dur:18s">
+  <div class="src in" style="--d:.4s"><b>references/grounding.md</b> · every threshold cites a measured figure</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Where the signals come from</div><h2 class="in" style="--d:.5s">Measured data in. <span>Specific checks out.</span></h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:2.4s" d="M340,290 C405,290 405,50 470,50"/>
+      <path class="w" pathLength="1" style="--d:4.4s" d="M340,290 C405,290 405,190 470,190"/>
+      <path class="w" pathLength="1" style="--d:6.4s" d="M340,290 C405,290 405,330 470,330"/>
+      <path class="w" pathLength="1" style="--d:8.4s" d="M340,290 C405,290 405,470 470,470"/>
+      <path class="w" pathLength="1" style="--d:3.2s" d="M990,50 L1140,50"/>
+      <path class="w" pathLength="1" style="--d:5.2s" d="M990,190 L1140,190"/>
+      <path class="w" pathLength="1" style="--d:7.2s" d="M990,330 L1140,330"/>
+      <path class="w" pathLength="1" style="--d:9.2s" d="M990,470 L1140,470"/>
+    </svg>
+    <div class="node key in" style="left:0;top:190px;width:340px;height:200px;--d:1s"><b>arXiv 2604.25707</b><span>602 prompts</span><span>21,143 citations</span><span>ChatGPT · Google AIO · Perplexity</span></div>
+    <div class="node in" style="left:470px;top:0;width:520px;--d:2.6s"><b>76.44% of cited pages were fetchable</b><span>reachability is a gate</span></div>
+    <div class="node in" style="left:470px;top:140px;width:520px;--d:4.6s"><b>Cited ≠ absorbed: 0.27 vs 0.06</b><span>ChatGPT vs Perplexity influence per page</span></div>
+    <div class="node in" style="left:470px;top:280px;width:520px;--d:6.6s"><b>FAQ format: −5.7% influence</b><span>the only negative genre</span></div>
+    <div class="node in" style="left:470px;top:420px;width:520px;--d:8.6s"><b>Bottom quartile: 170 words</b><span>0.85 headings · 8.34 paragraphs</span></div>
+    <div class="node in" style="left:1140px;top:0;width:540px;--d:3.4s"><b>Render-fault diagnosis</b><span style="font-family:var(--mono);font-size:15px">lib/geo_audit/renderfaults.py:160</span></div>
+    <div class="node in" style="left:1140px;top:140px;width:540px;--d:5.4s"><b>Separate selection and absorption skills</b><span style="font-family:var(--mono);font-size:15px">structured-data-identity · evidence-density</span></div>
+    <div class="node in" style="left:1140px;top:280px;width:540px;--d:7.4s"><b>Never recommend an FAQ</b><span style="font-family:var(--mono);font-size:15px">advise.py:413 · test_marketplace.py:959</span></div>
+    <div class="node in" style="left:1140px;top:420px;width:540px;--d:9.4s"><b>Floor thresholds</b><span style="font-family:var(--mono);font-size:15px">lib/geo_audit/config.py:142</span></div>
+    <div class="pk" style="--d:11s;--t:2.2s;offset-path:path('M170,290 L340,290 C405,290 405,50 470,50 L1140,50 L1400,50')"></div>
+    <div class="pk" style="--d:11.4s;--t:2.2s;offset-path:path('M170,290 L340,290 C405,290 405,190 470,190 L1140,190 L1400,190')"></div>
+    <div class="pk" style="--d:11.8s;--t:2.2s;offset-path:path('M170,290 L340,290 C405,290 405,330 470,330 L1140,330 L1400,330')"></div>
+    <div class="pk" style="--d:12.2s;--t:2.2s;offset-path:path('M170,290 L340,290 C405,290 405,470 470,470 L1140,470 L1400,470')"></div>
+  </div>
+</section>
+
+<!-- 5 · 72–88 genres -->
+<section class="scene" data-d="16" style="--dur:16s">
+  <div class="src in" style="--d:.4s"><b>skills/advisory-review/scripts/advise.py:413</b> · tests/test_marketplace.py:959</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Absorption</div><h2 class="in" style="--d:.5s">What makes a page shape the answer. <span>And what doesn't.</span></h2></div>
+  <div class="dia">
+    <div class="bars">
+      <div class="brow in" style="--d:1s"><span class="n">Code and examples</span><div class="btrack"><div class="bfill" style="width:920px;--d:1.3s"></div></div><span class="v" data-count="76.9" data-dec="1" data-pre="+" data-suffix="%" data-at="1.3" data-dur="1.4">0.0%</span></div>
+      <div class="brow in" style="--d:1.5s"><span class="n">Numbers and statistics</span><div class="btrack"><div class="bfill" style="width:737px;--d:1.8s"></div></div><span class="v" data-count="61.6" data-dec="1" data-pre="+" data-suffix="%" data-at="1.8" data-dur="1.4">0.0%</span></div>
+      <div class="brow in" style="--d:2s"><span class="n">Definitions</span><div class="btrack"><div class="bfill" style="width:686px;--d:2.3s"></div></div><span class="v" data-count="57.3" data-dec="1" data-pre="+" data-suffix="%" data-at="2.3" data-dur="1.4">0.0%</span></div>
+      <div class="brow in" style="--d:2.5s"><span class="n">Comparisons</span><div class="btrack"><div class="bfill" style="width:662px;--d:2.8s"></div></div><span class="v" data-count="55.3" data-dec="1" data-pre="+" data-suffix="%" data-at="2.8" data-dur="1.4">0.0%</span></div>
+      <div class="brow in" style="--d:3s"><span class="n">How-to steps</span><div class="btrack"><div class="bfill" style="width:493px;--d:3.3s"></div></div><span class="v" data-count="41.2" data-dec="1" data-pre="+" data-suffix="%" data-at="3.3" data-dur="1.4">0.0%</span></div>
+      <div class="brow faq in" style="--d:5.6s"><span class="n">Q&amp;A / FAQ format</span><div class="btrack"><div class="bfill neg" style="width:69px;--d:6s"></div></div><span class="v" data-count="-5.7" data-dec="1" data-suffix="%" data-at="6" data-dur="1.2">0.0%</span></div>
     </div>
-    <div class="card s" style="--d:4.5s"><h3>Influence per fetched page <span style="color:var(--mute);font-weight:400">· absorption</span></h3>
-      <div class="hb"><span>ChatGPT</span><div class="track"><div class="fill cg" style="width:100%;--d:5.4s">0.2713</div></div></div>
-      <div class="hb"><span>Perplexity</span><div class="track"><div class="fill px" style="width:24%;--d:6s">0.065</div></div></div>
-    </div>
-  </div>
-  <div class="pills">
-    <div class="pill s" style="--d:12s"><b>SELECTION</b> → structured-data-identity</div>
-    <div class="pill s" style="--d:12.8s"><b>ABSORPTION</b> → evidence-density</div>
+    <div class="note in" style="left:0;top:530px;--d:10.6s">Change in influence when a page carries that content. So the audit <b>never recommends adding an FAQ</b>.</div>
   </div>
 </section>
 
-<!-- 5 · 70–90 -->
-<section class="scene" data-d="20" data-anchor="advisory-review/scripts/advise.py:413  ·  tests/test_marketplace.py:959">
-  <div class="kicker s">The non-obvious finding · §8.2</div>
-  <h2 class="s" style="--d:.4s">Evidence lifts absorption. <em>FAQs don't.</em></h2>
-  <div class="gbars">
-    <span class="lbl s" style="--d:1.2s">Code / examples</span><div class="gtrack"><div class="gfill" style="width:860px;--d:1.4s"></div></div><span class="v s" style="--d:2.2s">+76.9%</span>
-    <span class="lbl s" style="--d:2.2s">Numbers / stats</span><div class="gtrack"><div class="gfill" style="width:688px;--d:2.4s"></div></div><span class="v s" style="--d:3.2s">+61.6%</span>
-    <span class="lbl s" style="--d:3.2s">Definitions</span><div class="gtrack"><div class="gfill" style="width:641px;--d:3.4s"></div></div><span class="v s" style="--d:4.2s">+57.3%</span>
-    <span class="lbl s" style="--d:4.2s">Comparisons</span><div class="gtrack"><div class="gfill" style="width:618px;--d:4.4s"></div></div><span class="v s" style="--d:5.2s">+55.3%</span>
-    <span class="lbl s" style="--d:5.2s">How-to</span><div class="gtrack"><div class="gfill" style="width:461px;--d:5.4s"></div></div><span class="v s" style="--d:6.2s">+41.2%</span>
-    <span class="lbl faq shake" style="--d:7.2s;--f:8.6s"><b style="color:var(--accent)">Q&amp;A / FAQ</b></span><div class="gtrack"><div class="gfill neg" style="width:64px;--d:7.6s"></div></div><span class="v shake" style="--d:8.2s;--f:8.6s;color:var(--accent);font-weight:700">−5.7%</span>
-    <div class="stampbox stamp" style="--d:13.2s">NEVER RECOMMENDED</div>
-  </div>
-</section>
-
-<!-- 6 · 90–105 -->
-<section class="scene" data-d="15" data-anchor="lib/geo_audit/config.py:142–150  bottom-quartile floors">
-  <div class="kicker s">Threshold logic · §8.1</div>
-  <h2 class="s" style="--d:.4s">Thresholds are a <em>floor</em>, not a target</h2>
-  <div class="scale">
-    <div class="axis s" style="--d:1s"></div>
-    <span class="tick s" style="left:0;--d:1s">0</span><span class="tick s" style="left:25%;--d:1s">500</span><span class="tick s" style="left:50%;--d:1s">1,000</span><span class="tick s" style="left:75%;--d:1s">1,500</span><span class="tick s" style="left:100%;--d:1s">2,000 words</span>
-    <div class="marker top rise" style="left:97.2%;--d:2s"><span>top 25%: 1,943</span></div>
-    <div class="marker floor rise" style="left:8.5%;--d:3s"><span>floor: 169.82</span></div>
-    <div class="dot low" style="left:3%;--d:4.4s;--f:6.2s"></div>
-    <div class="dot s" style="left:18%;--d:4.6s"></div>
-    <div class="dot s" style="left:31%;--d:4.8s"></div>
-    <div class="dot low" style="left:6%;--d:5.0s;--f:6.4s"></div>
-    <div class="dot s" style="left:44%;--d:5.2s"></div>
-    <div class="dot s" style="left:58%;--d:5.4s"></div>
-    <div class="dot s" style="left:24%;--d:5.6s"></div>
-    <div class="dot s" style="left:71%;--d:5.8s"></div>
-  </div>
-  <div class="mini">
-    <div class="s" style="--d:8s">Headings: floor <b>0.85</b> vs top 10.59</div>
-    <div class="s" style="--d:8.6s">Paragraphs: floor <b>8.34</b> vs top 47.49</div>
-  </div>
-  <p class="lead s" style="--d:10s;margin-top:40px">Only pages below the floor are flagged: <em>2 of 8</em>, not 7 of 8.</p>
-</section>
-
-<!-- 7 · 105–130 -->
-<section class="scene" data-d="25" data-anchor="lib/geo_audit/report.py:101 __post_init__  ·  report.py:269 validate_report">
-  <div class="kicker s">Severity logic</div>
-  <h2 class="s" style="--d:.4s">Two axes: <em>how bad</em> × <em>how sure</em></h2>
-  <div class="sevt">
-    <div class="th s" style="--d:1s">level</div><div class="th s" style="--d:1s">claim kind</div><div class="th s" style="--d:1s">severity ceiling</div>
-    <div class="s" style="--d:7s">1</div><div class="s" style="--d:7s">Direct observation — “0 of 12 pages carry JSON-LD”</div><div class="s" style="--d:7.4s"><span class="sev c">critical</span></div>
-    <div class="s" style="--d:8.6s">2</div><div class="s" style="--d:8.6s">Descriptive contrast</div><div class="s" style="--d:9s"><span class="sev h">high</span></div>
-    <div class="s" style="--d:10.2s">3</div><div class="s" style="--d:10.2s">Mechanism interpretation</div><div class="s" style="--d:10.6s"><span class="sev m">medium</span></div>
-    <div class="s" style="--d:14s">4</div><div class="s strike" style="--d:14s;--f:15s">Causal prescription</div><div class="s" style="--d:15.4s"><span class="sev n4">→ hypothesis only</span></div>
-  </div>
-  <div class="locks">
-    <div class="lock s" style="--d:20s">① construction<code>report.py:101</code></div>
-    <div class="lock s" style="--d:21s">② advisory re-level<code>advise.py:191</code></div>
-    <div class="lock s" style="--d:22s">③ schema validation<code>report.py:269</code></div>
-  </div>
-</section>
-
-<!-- 8 · 130–155 -->
-<section class="scene" data-d="25" data-anchor="advisory-review/scripts/advise.py:78 · 92 · 126 · 191 · 225 · 293">
-  <div class="kicker s">The advisory critic</div>
-  <h2 class="s" style="--d:.4s" >Detectors are optimistic. <em>Every finding must survive.</em></h2>
-  <div class="lane">
-    <div class="critbox s" style="--d:1s"><h4>advisory-review</h4>
-      <div class="cg8" style="--d:6.5s">① evidence</div>
-      <div class="cg8" style="--d:8.5s">② threshold</div>
-      <div class="cg8" style="--d:10.5s">③ sample size</div>
-      <div class="cg8" style="--d:12.5s">④ claim level</div>
-      <div class="cg8" style="--d:14.5s">⑤ false-positive traps</div>
-    </div>
-    <div class="fnd pass" style="top:10px;--d:5s">No JSON-LD on 8/11 pages<small style="color:var(--ok)">kept · URL + observed value</small></div>
-    <div class="fnd drop" style="top:110px;--d:7s">“Site lacks structured data”<small style="color:var(--accent)">dropped · no evidence</small></div>
-    <div class="fnd drop" style="top:210px;--d:9s">Median 1,400 ms vs &lt; 3,000 ms<small style="color:var(--accent)">dropped · no breach</small></div>
-    <div class="fnd down" style="top:310px;--d:11s">1 thin page → site-wide claim<small style="color:var(--warn)">downgraded · sample</small></div>
-    <div class="fnd pass" style="top:410px;--d:13s">robots.txt blocks PerplexityBot<small style="color:var(--ok)">kept · level 1 → critical ok</small></div>
-    <div class="merge">
-      <div class="mchip" style="top:40px;--y:340px;--d:18.5s">render fault: empty_shell</div>
-      <div class="mchip" style="top:120px;--y:260px;--d:18.7s">no structured data</div>
-      <div class="mchip" style="top:200px;--y:180px;--d:18.9s">thin content</div>
-      <div class="root s" style="--d:20.4s">1 root cause: JS-only render<small>deduplicate() merges symptoms → one fix</small></div>
+<!-- 6 · 88–100 floor -->
+<section class="scene" data-d="12" style="--dur:12s">
+  <div class="src in" style="--d:.4s"><b>lib/geo_audit/config.py:142–150</b> · bottom-quartile floors</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Thresholds</div><h2 class="in" style="--d:.5s">A floor to clear. <span>Not a target to chase.</span></h2></div>
+  <div class="dia">
+    <div class="axis" style="--d:.9s"></div>
+    <span class="tick in" style="left:0;--d:1s">0 words</span><span class="tick in" style="left:420px;--d:1s">500</span><span class="tick in" style="left:840px;--d:1s">1,000</span><span class="tick in" style="left:1260px;--d:1s">1,500</span><span class="tick in" style="left:1650px;--d:1s">2,000</span>
+    <div class="mk top" style="left:1632px;--d:1.8s"><span>Top quartile · 1,943</span></div>
+    <div class="mk floor" style="left:143px;--d:2.6s"><span>Our floor · 170</span></div>
+    <div class="dot low" style="left:50px;--d:3.4s;--h:5.6s"></div>
+    <div class="dot ok" style="left:300px;--d:3.6s;--h:5.8s"></div>
+    <div class="dot ok" style="left:520px;--d:3.8s;--h:5.9s"></div>
+    <div class="dot low" style="left:105px;--d:4.0s;--h:5.7s"></div>
+    <div class="dot ok" style="left:740px;--d:4.2s;--h:6.0s"></div>
+    <div class="dot ok" style="left:980px;--d:4.4s;--h:6.1s"></div>
+    <div class="dot ok" style="left:410px;--d:4.6s;--h:6.2s"></div>
+    <div class="dot ok" style="left:1200px;--d:4.8s;--h:6.3s"></div>
+    <div class="stats">
+      <div class="stat in" style="--d:7s"><b>2 of 8</b><span>pages flagged against the floor</span></div>
+      <div class="stat in" style="--d:7.5s"><b style="color:var(--mute)">7 of 8</b><span>would be flagged against the top</span></div>
     </div>
   </div>
 </section>
 
-<!-- 9 · 155–172 -->
-<section class="scene" data-d="17" data-anchor="lib/geo_audit/report.py:170  sort_findings()">
-  <div class="kicker s">Suggested actions</div>
-  <h2 class="s" style="--d:.4s">Every fix names its <em>mechanism</em> and its <em>test</em></h2>
-  <div class="two">
-    <div class="fix s" style="--d:1s">
-      <span class="type" style="--w:52ch;--d:1.4s"><span class="k">summary</span>Allow live-retrieval bots</span>
-      <span class="type" style="--w:52ch;--d:2.6s"><span class="k">priority</span>critical · effort low</span>
-      <span class="type" style="--w:52ch;--d:3.8s"><span class="k">mechanism</span>retrieval ≠ training crawl</span>
-      <span class="type" style="--w:52ch;--d:5s"><span class="k">verification</span><span style="color:var(--ok)">re-run: blocked = []</span></span>
-    </div>
-    <div>
-      <div class="sortlbl s" style="--d:7s">sort key: <b>severity → pipeline layer → confidence</b></div>
-      <div class="sorted">
-        <div class="srow" style="top:0;--d:7.4s;--m:140px"><span class="sev m">medium</span>Thin product pages<span class="lay">absorption</span></div>
-        <div class="srow" style="top:70px;--d:7.7s;--m:-70px"><span class="sev c">critical</span>AI bots blocked<span class="lay">preflight</span></div>
-        <div class="srow" style="top:140px;--d:8.0s;--m:70px"><span class="sev" style="background:#555">low</span>No robots.txt<span class="lay">preflight</span></div>
-        <div class="srow" style="top:210px;--d:8.3s;--m:-140px"><span class="sev h">high</span>No sitemap.xml<span class="lay">reachability</span></div>
-      </div>
-    </div>
-  </div>
-  <p class="lead s" style="--d:12s;margin-top:20px">Priority ≠ severity. Prefer <em>add the missing fact</em> over rewriting the page.</p>
-</section>
-
-<!-- 10 · 172–180 -->
-<section class="scene" data-d="8" data-anchor="">
-  <h1 class="s" style="--d:.2s">Now <span class="hl" style="--d2:.9s">live</span> →</h1>
-  <p class="lead s" style="--d:1s;margin-top:30px">Claude Code · Claude Opus 5.5 · a URL the audit has never seen</p>
-  <div class="term s" style="--d:1.6s">
-    <div><span class="p">$ </span><span class="type" style="--w:30ch;--d:2.2s">cd brand-ai-readiness-audit</span></div>
-    <div><span class="p">$ </span><span class="type" style="--w:6ch;--d:4s">claude</span> <span class="caret"></span></div>
+<!-- 7 · 100–124 severity -->
+<section class="scene" data-d="24" style="--dur:24s">
+  <div class="src in" style="--d:.4s"><b>lib/geo_audit/report.py:101</b> · advise.py:191 · report.py:269</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Severity</div><h2 class="in" style="--d:.5s">How bad it is. <span>Capped by how sure we are.</span></h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:1.8s" d="M220,210 L300,210"/>
+      <path class="w" pathLength="1" style="--d:5.8s" d="M540,210 C590,210 590,42 640,42"/>
+      <path class="w" pathLength="1" style="--d:7.0s" d="M540,210 C590,210 590,152 640,152"/>
+      <path class="w" pathLength="1" style="--d:8.2s" d="M540,210 C590,210 590,262 640,262"/>
+      <path class="w red" pathLength="1" style="--d:12s" d="M540,210 C590,210 590,372 640,372"/>
+      <path class="w hot" pathLength="1" style="--d:18.4s;--h:21s" d="M360,550 L440,550"/>
+      <path class="w hot" pathLength="1" style="--d:19.4s;--h:21.4s" d="M800,550 L880,550"/>
+      <path class="w hot" pathLength="1" style="--d:20.4s;--h:21.8s" d="M1240,550 L1320,550"/>
+    </svg>
+    <div class="node in" style="left:0;top:160px;width:220px;--d:1s"><b>Finding</b><span>from any detector</span></div>
+    <div class="node key in" style="left:300px;top:160px;width:240px;--d:2.2s"><b>Claim level?</b><span>how sure are we</span></div>
+    <div class="node row in" style="left:640px;top:0;width:620px;height:84px;--d:6.2s"><b>1 · Direct observation</b><span class="chip c-red">up to Critical</span></div>
+    <div class="node row in" style="left:640px;top:110px;width:620px;height:84px;--d:7.4s"><b>2 · Descriptive contrast</b><span class="chip c-or">up to High</span></div>
+    <div class="node row in" style="left:640px;top:220px;width:620px;height:84px;--d:8.6s"><b>3 · Mechanism interpretation</b><span class="chip c-ye">up to Medium</span></div>
+    <div class="node row in" style="left:640px;top:330px;width:620px;height:84px;--d:12.4s"><b style="color:var(--mute)">4 · Causal prescription</b><span class="chip c-gr">Hypothesis only</span></div>
+    <div class="lbl in" style="left:1290px;top:30px;--d:6.8s">"0 of 12 pages carry JSON-LD"</div>
+    <div class="lbl in" style="left:1290px;top:250px;--d:9.2s">"thin pages give little to extract"</div>
+    <div class="lbl in" style="left:1290px;top:360px;--d:13s">"this will increase citations"</div>
+    <div class="lbl in" style="left:0;top:462px;--d:18s;color:var(--ink);font-weight:600;font-size:18px">Enforced three times</div>
+    <div class="node in" style="left:0;top:500px;width:360px;--d:18s"><b>1 · Construction</b><span style="font-family:var(--mono);font-size:15px">report.py:101 · __post_init__</span></div>
+    <div class="node in" style="left:440px;top:500px;width:360px;--d:19s"><b>2 · Advisory re-level</b><span style="font-family:var(--mono);font-size:15px">advise.py:191</span></div>
+    <div class="node in" style="left:880px;top:500px;width:360px;--d:20s"><b>3 · Schema validation</b><span style="font-family:var(--mono);font-size:15px">report.py:269 · validate_report</span></div>
+    <div class="node key in" style="left:1320px;top:500px;width:360px;--d:21s"><b>Report</b><span>no claim above its ceiling</span></div>
   </div>
 </section>
 
-<div id="wipe"></div>
+<!-- 8 · 124–150 critic -->
+<section class="scene" data-d="26" style="--dur:26s">
+  <div class="src in" style="--d:.4s"><b>skills/advisory-review/scripts/advise.py</b> · gates :78 :92 :126 :191 :225 · merge :293</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">The advisory critic</div><h2 class="in" style="--d:.5s">Every finding has to earn its place.</h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:1.4s" d="M200,200 L1450,200"/>
+      <path class="w" pathLength="1" style="--d:2.4s" d="M355,90 L355,192"/>
+      <path class="w" pathLength="1" style="--d:2.6s" d="M585,90 L585,192"/>
+      <path class="w" pathLength="1" style="--d:2.8s" d="M815,90 L815,192"/>
+      <path class="w" pathLength="1" style="--d:3.0s" d="M1045,90 L1045,192"/>
+      <path class="w" pathLength="1" style="--d:3.2s" d="M1275,90 L1275,192"/>
+      <path class="w" pathLength="1" style="--d:19.2s" d="M1200,425 C1265,425 1265,480 1330,480"/>
+      <path class="w" pathLength="1" style="--d:19.4s" d="M1200,495 C1265,495 1265,480 1330,480"/>
+      <path class="w" pathLength="1" style="--d:19.6s" d="M1200,565 C1265,565 1265,480 1330,480"/>
+    </svg>
+    <div class="node in" style="left:0;top:150px;width:200px;--d:1s"><b>Detectors</b><span>raw findings</span></div>
+    <div class="node in" style="left:260px;top:0;width:190px;height:90px;--d:1.8s"><b>Evidence</b><span>URL + value</span></div>
+    <div class="node in" style="left:490px;top:0;width:190px;height:90px;--d:2.0s"><b>Threshold</b><span>really breached</span></div>
+    <div class="node in" style="left:720px;top:0;width:190px;height:90px;--d:2.2s"><b>Sample</b><span>enough pages</span></div>
+    <div class="node in" style="left:950px;top:0;width:190px;height:90px;--d:2.4s"><b>Claim level</b><span>capped</span></div>
+    <div class="node in" style="left:1180px;top:0;width:190px;height:90px;--d:2.6s"><b>False positives</b><span>known traps</span></div>
+    <div class="node key in" style="left:1450px;top:150px;width:230px;--d:3.4s"><b>Report</b><span>survivors only</span></div>
+    <div class="cp in" style="left:355px;top:200px;--d:3s"></div><div class="cp in" style="left:585px;top:200px;--d:3.1s"></div><div class="cp in" style="left:815px;top:200px;--d:3.2s"></div><div class="cp in" style="left:1045px;top:200px;--d:3.3s"></div><div class="cp in" style="left:1275px;top:200px;--d:3.4s"></div>
+    <div class="tok pass" style="--d:4s;offset-path:path('M100,200 L1565,200')">No JSON-LD · 8 of 11 pages</div>
+    <div class="tok drop" style="--d:6.4s;--k:54%;offset-path:path('M100,200 L355,200 L355,420')">"Lacks structured data"</div>
+    <div class="tok drop" style="--d:8.8s;--k:69%;offset-path:path('M100,200 L585,200 L585,420')">1.4 s vs a 3 s limit</div>
+    <div class="tok down" style="--d:11.2s;offset-path:path('M100,200 L1565,200')">1 page, site-wide claim</div>
+    <div class="tok pass" style="--d:13.6s;offset-path:path('M100,200 L1565,200')">PerplexityBot blocked</div>
+    <div class="lbl in" style="left:250px;top:470px;--d:10.4s">dropped · reason logged in <span style="font-family:var(--mono);color:var(--ink)">report.advisory</span></div>
+    <div class="node in" style="left:900px;top:400px;width:300px;height:50px;--d:17.6s;padding:0 18px"><span style="margin:0">Render fault</span></div>
+    <div class="node in" style="left:900px;top:470px;width:300px;height:50px;--d:17.9s;padding:0 18px"><span style="margin:0">No structured data</span></div>
+    <div class="node in" style="left:900px;top:540px;width:300px;height:50px;--d:18.2s;padding:0 18px"><span style="margin:0">Thin content</span></div>
+    <div class="node key in" style="left:1330px;top:430px;width:350px;--d:20.2s"><b>One root cause</b><span>JavaScript-only page · one fix</span></div>
+    <div class="lbl in" style="left:900px;top:362px;--d:17.4s">symptoms merged</div>
+  </div>
+</section>
+
+<!-- 9 · 150–170 action -->
+<section class="scene" data-d="20" style="--dur:20s">
+  <div class="src in" style="--d:.4s"><b>lib/geo_audit/report.py:170</b> · sort_findings()</div>
+  <div class="head"><div class="eyebrow in" style="--d:.3s">Suggested actions</div><h2 class="in" style="--d:.5s">From finding to fix. <span>In the right order.</span></h2></div>
+  <div class="dia">
+    <svg class="wires" viewBox="0 0 1680 660" width="1680" height="660">
+      <path class="w" pathLength="1" style="--d:4.4s" d="M480,250 L600,250"/>
+      <path class="w" pathLength="1" style="--d:9.4s" d="M1080,250 L1200,250"/>
+    </svg>
+    <div class="card in" style="left:0;top:20px;width:480px;height:470px;--d:1s">
+      <h4>Finding</h4><div class="t">robots.txt blocks PerplexityBot</div>
+      <div class="kv in" style="--d:1.6s"><i>severity</i><span><span class="chip c-red" style="margin:0">Critical</span></span></div>
+      <div class="kv in" style="--d:2s"><i>claim level</i><span>1 · direct observation</span></div>
+      <div class="kv in" style="--d:2.4s"><i>observed</i><span>Disallow: / for PerplexityBot</span></div>
+      <div class="kv in" style="--d:2.8s"><i>expected</i><span>retrieval agents allowed</span></div>
+      <div class="kv in" style="--d:3.2s"><i>evidence</i><span style="font-family:var(--mono);font-size:15px">https://…/robots.txt</span></div>
+    </div>
+    <div class="card in" style="left:600px;top:20px;width:480px;height:470px;--d:5s">
+      <h4>Suggested action</h4><div class="t">Allow live-retrieval agents</div>
+      <div class="kv in" style="--d:5.6s"><i>priority</i><span>Critical · effort low</span></div>
+      <div class="kv in" style="--d:6s"><i>steps</i><span>edit robots.txt groups</span></div>
+      <div class="kv in" style="--d:6.4s"><i>mechanism</i><span>retrieval ≠ training crawl</span></div>
+      <div class="kv in" style="--d:6.8s"><i>verify</i><span style="color:var(--green)">re-run · none blocked</span></div>
+    </div>
+    <div class="card in" style="left:1200px;top:20px;width:480px;height:470px;--d:9.6s">
+      <h4>Prioritised report</h4><div class="t" style="font-size:18px;color:var(--mute);font-weight:500">severity → pipeline layer → confidence</div>
+      <div class="srow" style="top:130px;--d:10.2s;--h:13s;--m:132px"><span class="chip c-ye">Medium</span>Thin product pages<span class="lay">absorption</span></div>
+      <div class="srow" style="top:196px;--d:10.5s;--h:13s;--m:-66px"><span class="chip c-red">Critical</span>AI bots blocked<span class="lay">preflight</span></div>
+      <div class="srow" style="top:262px;--d:10.8s;--h:13s;--m:66px"><span class="chip c-gr">Low</span>No robots.txt<span class="lay">preflight</span></div>
+      <div class="srow" style="top:328px;--d:11.1s;--h:13s;--m:-132px"><span class="chip c-or">High</span>No sitemap.xml<span class="lay">reachability</span></div>
+    </div>
+    <div class="pk" style="--d:7.6s;--t:1.6s;offset-path:path('M420,250 L660,250')"></div>
+    <div class="pk" style="--d:11.6s;--t:1.6s;offset-path:path('M1020,250 L1260,250')"></div>
+    <div class="note in" style="left:0;top:540px;--d:15s">Prefer <b>adding the missing fact</b> over rewriting the page.</div>
+  </div>
+</section>
+
+<!-- 10 · 170–180 live -->
+<section class="scene" data-d="10" style="--dur:10s">
+  <div class="hero">
+    <h1 class="in" style="--d:.3s">Now, live.</h1>
+    <p class="in" style="--d:1.2s">Claude Code 2.1.132 · Claude Opus 5.5 · a site it has never seen</p>
+    <div class="term in" style="--d:2.2s"><span class="p">$ </span><span class="type" style="--w:6ch;--d:3.2s">claude</span><span class="caret"></span></div>
+  </div>
+</section>
+
 <div id="sub"></div>
 </div>
 
 <script>
-// Subtitle cues [start, end, text] — the presenter's lines (single source for burned-in subs and .srt)
+// Subtitle cues [start, end, text]: the presenter's lines. Single source for burned-in subs and the .srt.
 window.CUES=[
-[0.4,6,"We audit why AI assistants don't cite a brand, and why the visitors who do arrive don't stay."],
-[6,12,"Eight skills, one entrypoint: audit-orchestrator. Python standard library only."],
-[12,18,"Our core insight: generative engine optimisation is a staged pipeline, not a ranking."],
-[18,25,"A page must clear every gate in order, and the gate it fails decides the fix."],
-[25,32,"Fail at selection, and the fix is to declare the entity, not to write more content."],
-[32,39,"Our signals come from measured data: 602 prompts and 21,143 citations across three AI engines."],
-[39,46,"Only 76.44% of pages an engine had already chosen to cite could actually be fetched."],
-[46,52,"So reachability is a gate, with per-type JavaScript render-fault diagnosis."],
-[52,58,"Being cited is not the same as mattering."],
-[58,64,"Perplexity cites 2.4× more sources than ChatGPT, but absorbs each about a quarter as deeply."],
-[64,70,"So selection and absorption are audited separately, because they need different fixes."],
-[70,77,"Evidence genres (code, numbers, definitions, comparisons) measurably lift absorption."],
-[77,84,"'Add an FAQ' is standard advice, and the only genre the research measures as negative."],
-[84,90,"Our marketplace never recommends it, and a regression test enforces that."],
-[90,97,"Thresholds sit at the bottom quartile: a floor to clear, not a target to chase."],
-[97,105,"Flag everything below the top quartile and you fire on most of the web. Precision first."],
-[105,112,"Severity asks how much it costs. Critical means the brand cannot enter the candidate pool."],
-[112,119,"Claim level asks how sure we are, and caps severity. A mechanism guess can never be critical."],
-[119,125,"A causal promise is never a finding; it becomes a labelled hypothesis instead."],
-[125,130,"The cap is enforced three times: at construction, in advisory review, and in schema validation."],
-[130,136,"Detectors are optimistic by design, so every finding must survive an advisory critic."],
-[136,143,"It needs a real URL and observed value, a real threshold breach, and enough sampled pages."],
-[143,149,"Weak claims are dropped or downgraded. Nothing reaches the report without passing the critic."],
-[149,155,"Three symptoms of one JavaScript render fault merge into a single root-cause fix."],
-[155,161,"Every suggested action names its mechanism and how to verify the fix."],
-[161,167,"Priority is not severity. Findings sort by severity, then pipeline order: causes first."],
-[167,172,"We prefer adding the missing fact over rewriting the page; rewrites measurably backfired."],
-[172,179.6,"Now live: Claude Code with Claude Opus 5.5, on a site the audit has never seen."]
+[0.8,6,"This is Brand AI-Readiness Audit, a skill marketplace for AI agents."],
+[6,11.6,"Give it a URL, and it explains why AI assistants don't cite that brand, and what to fix first."],
+[12.5,18,"Here's the architecture. Claude Code loads one entrypoint skill, audit-orchestrator."],
+[18,23.5,"It checks the URL is safe to audit, then crawls the site once into a shared page inventory."],
+[23.5,29,"Four detector skills read that inventory independently: selection, absorption, trust and engagement."],
+[29,33.6,"Every finding passes an advisory critic before it's composed into one report."],
+[34.5,40,"We treat AI visibility as a series of gates, not a single score."],
+[40,46,"A page has to clear each gate in order, and each gate has its own fix."],
+[46,53.6,"If a page stops at selection, more content won't help. It needs a clear entity declaration."],
+[54.5,60,"Every check traces back to measured data: 602 prompts and 21,143 citations."],
+[60,66,"For example, only 76% of the pages an engine chose to cite could actually be fetched."],
+[66,71.6,"Each measured fact maps to a specific check in the code."],
+[72.5,78,"Pages with code, numbers, definitions and comparisons shape answers more."],
+[78,83,"FAQ formatting is the one pattern that measured negative."],
+[83,87.6,"So the audit never tells you to add an FAQ, and a test makes sure of it."],
+[88.5,94,"Thresholds sit at the bottom quartile. It's a floor, not a target."],
+[94,99.6,"That keeps the audit precise. It flags the pages that really fall short."],
+[100.5,106,"Severity says how much a problem costs. Claim level says how sure we are."],
+[106,112,"A direct observation can be critical. An interpretation is capped at medium."],
+[112,118,"A causal promise is never reported as a finding. It's kept as a hypothesis."],
+[118,123.6,"That cap is checked three times: at construction, in review, and at schema validation."],
+[124.5,130,"Detectors are optimistic by design, so every finding has to get past a critic."],
+[130,136,"It needs a real URL and a measured value, and the value has to break the threshold."],
+[136,142,"Weak claims are dropped or downgraded, and the reason is logged in the report."],
+[142,149.6,"Symptoms of one cause, like a JavaScript-only page, are merged into a single fix."],
+[150.5,156,"Each finding becomes an action with steps, effort, the mechanism, and a way to verify it."],
+[156,162,"Findings are sorted by severity, then pipeline order, so root causes come first."],
+[162,169.6,"And we'd rather add a missing fact than rewrite a page. Rewrites measurably backfired."],
+[170.5,179.4,"Now let's run it live, with Claude Code and Claude Opus 5.5, on a site it hasn't seen."]
 ];
-const RENDER=/render=1/.test(location.search), NOSUBS=/nosubs=1/.test(location.search);
+const RENDER=/render=1/.test(location.search),NOSUBS=/nosubs=1/.test(location.search);
 const S=[...document.querySelectorAll('.scene')],D=S.map(s=>+s.dataset.d);
 const START=D.map((_,k)=>D.slice(0,k).reduce((a,b)=>a+b,0));window.TOTAL=D.reduce((a,b)=>a+b,0);
-const $=id=>document.getElementById(id),prog=$('prog'),sub=$('sub'),anchor=$('anchor'),wipe=$('wipe'),stage=$('stage');
+const sub=document.getElementById('sub'),stage=document.getElementById('stage');
 let cur=-1;
-function sceneAt(t){let k=0;for(let j=0;j<S.length;j++)if(t>=START[j])k=j;return k}
+const ease=p=>1-Math.pow(1-p,4);
 window.seek=function(t){
   t=Math.max(0,Math.min(TOTAL-0.001,t));
-  const k=sceneAt(t);
-  if(k!==cur){S.forEach(s=>s.classList.remove('on'));S[k].classList.add('on');cur=k;anchor.textContent=S[k].dataset.anchor||''}
+  let k=0;for(let j=0;j<S.length;j++)if(t>=START[j])k=j;
+  if(k!==cur){S.forEach(s=>s.classList.remove('on'));S[k].classList.add('on');cur=k}
   const local=t-START[k];
   for(const a of document.getAnimations()){a.pause();const el=a.effect&&a.effect.target;
     a.currentTime=(el&&el.closest&&el.closest('.scene'))?local*1000:t*1000}
-  // counters
-  S[k].querySelectorAll('[data-count]').forEach(e=>{const at=+e.dataset.at,du=+e.dataset.dur,v=+e.dataset.count,dec=+(e.dataset.dec||0);
-    const p=Math.max(0,Math.min(1,(local-at)/du)),q=Math.round((1-Math.pow(1-p,3))*12)/12;
-    e.textContent=(v*q).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec})+(e.dataset.suffix||'')});
-  // transition wipe (first .5s of each scene after the first)
-  const w=k>0&&local<0.5?local/0.5:null;
-  wipe.style.left=w===null?'-130%':(-100+Math.floor(w*8)/8*230)+'%';
-  prog.style.width=(t/TOTAL*100)+'%';
-  const c=NOSUBS?null:CUES.find(c=>t>=c[0]&&t<c[1]);sub.textContent=c?c[2]:'';
+  S[k].querySelectorAll('[data-count]').forEach(e=>{const p=Math.max(0,Math.min(1,(local-+e.dataset.at)/+e.dataset.dur)),v=+e.dataset.count*ease(p),dec=+(e.dataset.dec||0);
+    e.textContent=(v>0?(e.dataset.pre||''):'')+(v<0?'−':'')+Math.abs(v).toFixed(dec)+(e.dataset.suffix||'')});
+  const c=NOSUBS?null:CUES.find(c=>t>=c[0]&&t<c[1]);
+  if(c){sub.textContent=c[2];sub.style.opacity=Math.min(1,(t-c[0])/.25,(c[1]-t)/.25)}else sub.textContent='';
 };
-function fit(){const s=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform='scale('+s+')'}
+function fit(){stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'}
 addEventListener('resize',fit);fit();
 if(!RENDER){
   let t0=performance.now(),paused=false,pt=0;
-  const loop=()=>{const t=paused?pt:(performance.now()-t0)/1000%TOTAL;seek(t);requestAnimationFrame(loop)};
+  const loop=()=>{seek(paused?pt:(performance.now()-t0)/1000%TOTAL);requestAnimationFrame(loop)};
   addEventListener('keydown',e=>{
-    if(e.key===' '){if(!paused){pt=(performance.now()-t0)/1000%TOTAL}else{t0=performance.now()-pt*1000}paused=!paused;e.preventDefault()}
+    const now=(performance.now()-t0)/1000%TOTAL;
+    if(e.key===' '){if(!paused)pt=now;else t0=performance.now()-pt*1000;paused=!paused;e.preventDefault()}
     if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const k=Math.max(0,Math.min(S.length-1,cur+(e.key==='ArrowRight'?1:-1)));pt=START[k];t0=performance.now()-pt*1000}
     if(e.key==='r'){pt=0;t0=performance.now()}});
   loop();
-}else{seek(0)}
+}else seek(0);
 </script>
 </body>
 </html>

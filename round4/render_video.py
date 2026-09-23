@@ -22,7 +22,7 @@ def srt_time(s: float) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--fps", type=int, default=24)
+    ap.add_argument("--fps", type=int, default=60)
     ap.add_argument("--nosubs", action="store_true")
     ap.add_argument("--out", default=str(HERE / "part1-methodology.mp4"))
     args = ap.parse_args()
