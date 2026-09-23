@@ -1,0 +1,131 @@
+{
+  "name": "brand-ai-readiness-audit",
+  "version": "1.2.1",
+  "description": "Audits a website for the problems that keep a brand from being found and cited by AI assistants, and from holding the visitors who do arrive. Emits one evidence-backed report of findings plus prioritised, mechanism-sound suggested actions.",
+  "license": "MIT",
+  "entrypoint": "audit-orchestrator",
+  "skills": [
+    {
+      "id": "audit-orchestrator",
+      "path": "skills/audit-orchestrator",
+      "entrypoint": true,
+      "layer": "composition",
+      "summary": "Runs the pipeline, composes every other skill's output into the single audit report, validates it against the schema, and renders JSON, Markdown, HTML and PDF."
+    },
+    {
+      "id": "url-validation",
+      "path": "skills/url-validation",
+      "layer": "preflight",
+      "summary": "Normalises and safety-gates the target URL: canonicalisation, SSRF defence, DNS resolution, per-hop redirect revalidation, robots.txt policy, scope and budget."
+    },
+    {
+      "id": "crawl-reachability",
+      "path": "skills/crawl-reachability",
+      "layer": "reachability",
+      "summary": "Determines whether a crawler can obtain and read the pages: discovery, deep sitemap.xml audit, JavaScript render-fault diagnosis, indexability and canonical checks."
+    },
+    {
+      "id": "structured-data-identity",
+      "path": "skills/structured-data-identity",
+      "layer": "selection",
+      "summary": "Selection-layer eligibility: structured-data validity and appropriateness, organisation completeness, sameAs breadth and entity disambiguation."
+    },
+    {
+      "id": "evidence-density",
+      "path": "skills/evidence-density",
+      "layer": "absorption",
+      "summary": "Absorption-layer readiness: evidence genres, structural legibility, and the Q&A-format trap, calibrated against the paper's measured influence quartiles."
+    },
+    {
+      "id": "freshness-corroboration",
+      "path": "skills/freshness-corroboration",
+      "layer": "trust",
+      "summary": "Trust signals: datestamp presence and honesty, staleness by page type, and load-bearing claims asserted without corroboration."
+    },
+    {
+      "id": "engagement-audit",
+      "path": "skills/engagement-audit",
+      "layer": "engagement",
+      "summary": "The on-site half: answer-first orientation, intent continuity for AI-referred visitors, interstitials, scannability and summariser legibility."
+    },
+    {
+      "id": "advisory-review",
+      "path": "skills/advisory-review",
+      "layer": "verification",
+      "summary": "The in-loop critic. Verifies evidence sufficiency, threshold coherence, sample sufficiency, claim-level discipline and known false-positive traps; drops, downgrades and merges findings; adds the proactive layer."
+    }
+  ],
+  "pipeline": [
+    "url-validation",
+    "crawl-reachability",
+    "structured-data-identity",
+    "evidence-density",
+    "freshness-corroboration",
+    "engagement-audit",
+    "advisory-review",
+    "audit-orchestrator"
+  ],
+  "runtime": {
+    "language": "python3",
+    "minimum_version": "3.10",
+    "dependencies": [],
+    "note": "Standard library only. No pip installs, no external services, no model weights. The marketplace resolves entirely from its own contents."
+  },
+  "allowed_tools": [
+    "Bash(python3 skills/*/scripts/*.py)",
+    "Read",
+    "Write"
+  ],
+  "network": {
+    "access": "outbound-http-https-only",
+    "scope": "the registrable domain of the supplied URL, plus its robots.txt and sitemap",
+    "methods": [
+      "GET",
+      "HEAD"
+    ],
+    "authenticated": false,
+    "respects_robots_txt": true,
+    "rate_limited": true
+  },
+  "safety": {
+    "mode": "recommend-only",
+    "mutates_target_site": false,
+    "destructive_actions": false,
+    "authenticated_areas": false,
+    "javascript_execution": false,
+    "ssrf_protection": "private, loopback, link-local, CGNAT, reserved and metadata address space blocked; every redirect hop revalidated"
+  },
+  "output": {
+    "schema": "skills/audit-orchestrator/references/report-schema.json",
+    "formats": [
+      "json",
+      "md",
+      "html",
+      "pdf"
+    ],
+    "required_fields": [
+      "site",
+      "audited_at",
+      "summary.total_findings",
+      "summary.critical",
+      "summary.high",
+      "summary.medium",
+      "findings[].id",
+      "findings[].title",
+      "findings[].severity",
+      "findings[].evidence",
+      "findings[].suggested_action.summary",
+      "findings[].suggested_action.priority"
+    ]
+  },
+  "grounding": {
+    "primary_reference": "Zhang K., He X., Yao J. (2026). From Citation Selection to Citation Absorption: A Measurement Framework for Generative Engine Optimization Across AI Search Platforms. arXiv:2604.25707v2.",
+    "supporting_references": [
+      "arXiv:2607.14035 — a survey of 45 GEO studies. Supplies the extractable-fact genres (prices, visible dates), the graded lever table used to label suggested actions, and the retrieval-backfire results.",
+      "arXiv:2609.07559 — shows page-quality scores correlate only weakly with citation (Spearman ≈ 0.11). The absorption proxy is therefore documented as a quality filter, not a citation predictor.",
+      "arXiv:2605.25517 — 252k-trial study; corroborates that prices and recent timestamps help extraction."
+    ],
+    "encoded_findings": "references/grounding.md",
+    "claim_discipline": "Where a lever is measured with an effect size (arXiv:2604.25707) the report cites the figure; where a lever is only graded (arXiv:2607.14035 §7.5 Table 4) the report cites the grade. The two are never blended into one number or one chart."
+  }
+}

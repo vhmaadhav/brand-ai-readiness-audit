@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/brand-ai-readiness-audit/report-schema.json",
+  "title": "Brand AI-Readiness Audit Report",
+  "description": "The report emitted by the audit-orchestrator entrypoint. The required properties reproduce the contest's minimum shape exactly; everything else is an addition.",
+  "type": "object",
+  "required": ["site", "audited_at", "summary", "findings"],
+  "properties": {
+    "site": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The audited host, e.g. \"example.com\"."
+    },
+    "audited_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+      "description": "ISO-8601 UTC timestamp."
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total_findings", "critical", "high", "medium"],
+      "properties": {
+        "total_findings": { "type": "integer", "minimum": 0 },
+        "critical": { "type": "integer", "minimum": 0 },
+        "high": { "type": "integer", "minimum": 0 },
+        "medium": { "type": "integer", "minimum": 0 },
+        "low": { "type": "integer", "minimum": 0 },
+        "info": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "severity", "evidence", "suggested_action"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F-\\d{3}$" },
+          "title": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["critical", "high", "medium", "low", "info"] },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Must carry a concrete observed value, and a URL must appear either here or in affected_urls. Enforced by the advisory-review evidence-sufficiency gate; a finding that satisfies neither is dropped."
+          },
+          "suggested_action": {
+            "type": "object",
+            "required": ["summary", "priority"],
+            "properties": {
+              "summary": { "type": "string", "minLength": 1 },
+              "priority": { "enum": ["critical", "high", "medium", "low"] },
+              "steps": { "type": "array", "items": { "type": "string" } },
+              "effort": { "enum": ["low", "medium", "high"] },
+              "mechanism": {
+                "type": "string",
+                "description": "Why the fix works, expressed in pipeline terms."
+              },
+              "verification": {
+                "type": "string",
+                "description": "How to confirm the fix landed."
+              }
+            }
+          },
+          "layer": {
+            "enum": ["preflight", "reachability", "selection", "absorption", "trust", "engagement"],
+            "description": "Which pipeline gate the finding belongs to."
+          },
+          "claim_level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3,
+            "description": "1 direct observation, 2 descriptive contrast, 3 mechanism interpretation. Level 4 causal prescriptions are never emitted as findings; they appear only in proactive_recommendations."
+          },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "check_id": { "type": "string" },
+          "observed": { "type": "string" },
+          "expected": { "type": "string" },
+          "affected_urls": { "type": "array", "items": { "type": "string" } },
+          "sample_size": { "type": "integer", "minimum": 0 },
+          "consequences": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Downstream symptoms merged into this root cause by the advisory layer."
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "description": "What was actually audited, so the reader can calibrate the findings.",
+      "properties": {
+        "target_url": { "type": "string" },
+        "registrable_domain": { "type": "string" },
+        "pages_discovered": { "type": "integer" },
+        "pages_analysed": { "type": "integer" },
+        "page_types": { "type": "object" },
+        "robots_respected": { "const": true },
+        "javascript_executed": { "const": false },
+        "runtime_seconds": { "type": "number" },
+        "rehomed_from": {
+          "type": "string",
+          "description": "Present only when the supplied URL redirected permanently to a different registrable domain and the audit was re-anchored to it. The same fact is repeated in limitations[], because a re-anchored scope changes what the report is about."
+        }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "description": "Site-level measurements backing the findings and driving the charts.",
+      "properties": {
+        "absorption": { "type": "object" },
+        "evidence_genres": {
+          "type": "object",
+          "description": "Coverage of the genres whose influence uplift arXiv:2604.25707 §8.2 measures: definition, comparison, howto, numeric, code, qa_format. These are the only genres with an effect size, so they are the only ones plotted against the uplift bars."
+        },
+        "survey_genres": {
+          "type": "object",
+          "description": "Coverage of the extractable-fact genres arXiv:2607.14035 §7.2 names and §7.5 Table 4 grades Moderate: price, dated. Deliberately kept out of evidence_genres — a coverage grade and a measured effect size are different orders of claim and must not share a chart."
+        },
+        "reachability": { "type": "object" },
+        "word_counts": { "type": "array" }
+      }
+    },
+    "proactive_recommendations": {
+      "type": "array",
+      "description": "Improvements where no defect was detected. The only place claim-level-4 material may appear, and only as a labelled hypothesis.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "rationale", "action", "priority"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^P-\\d{3}$" },
+          "title": { "type": "string" },
+          "rationale": { "type": "string" },
+          "action": { "type": "string" },
+          "priority": { "enum": ["critical", "high", "medium", "low"] },
+          "basis": { "type": "string" },
+          "claim_level": { "type": "integer", "minimum": 1, "maximum": 4 }
+        }
+      }
+    },
+    "advisory": {
+      "type": "object",
+      "description": "Audit trail from the in-loop critic: what it removed, demoted or merged, and why.",
+      "properties": {
+        "findings_in": { "type": "integer" },
+        "findings_out": { "type": "integer" },
+        "rejection_rate": { "type": "number" },
+        "dropped": { "type": "array" },
+        "downgraded": { "type": "array" },
+        "merged": { "type": "array" },
+        "policy": { "type": "string" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What this audit could not see. Stated so findings are not over-read."
+    },
+    "generator": { "type": "object" }
+  }
+}
